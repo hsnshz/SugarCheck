@@ -52,6 +52,11 @@ const SignInScreen = ({ navigation }) => {
 
       setEmail("");
       setPassword("");
+
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "DiabetesForm" }],
+      });
     }
   };
 

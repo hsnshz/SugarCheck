@@ -4,6 +4,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import WelcomeScreen from "../screens/WelcomeScreen";
 import SignInScreen from "../screens/SignInScreen";
 import SignUpScreen from "../screens/SignUpScreen";
+import DiabetesFormScreen from "../screens/DiabetesFormScreen";
 import { useNavigation } from "@react-navigation/native";
 import HeaderBackButton from "../components/HeaderBackButton";
 import colors from "../../config/colors";
@@ -43,6 +44,13 @@ function AppNavigator() {
           headerStyle: {
             backgroundColor: colors.background,
           },
+        }}
+      />
+      <Stack.Screen
+        name="DiabetesForm"
+        component={DiabetesFormScreen}
+        options={{
+          headerShown: false,
         }}
       />
     </Stack.Navigator>
