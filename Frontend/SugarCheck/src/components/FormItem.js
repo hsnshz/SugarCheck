@@ -32,13 +32,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "flex-start",
     marginBottom: 20,
+    width: "100%",
   },
   label: {
     width: 110,
     fontFamily: "MontserratRegular",
     fontSize: 18,
     marginRight: 10,
-    marginLeft: 48,
+    marginLeft: 10,
   },
   radioGroup: {
     flexDirection: "row",
@@ -48,7 +49,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginLeft: 10,
-    minWidth: 70,
+    minWidth: 75,
   },
   outerCircle: {
     height: 24,

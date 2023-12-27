@@ -21,8 +21,8 @@ const SignInScreen = ({ navigation }) => {
   const [password, setPassword] = useState("");
 
   const loginName = "Hassan";
-  const loginEmail = "hsn-63@hotmail.com";
-  const loginPswd = "12345678";
+  const loginEmail = "h@h.com";
+  const loginPswd = "123";
 
   const validateInput = () => {
     // Check if fields are not empty
@@ -48,8 +48,6 @@ const SignInScreen = ({ navigation }) => {
 
   const handleSubmit = () => {
     if (validateInput()) {
-      Alert.alert("Login Successful", `Welcome back, ${loginName}!`);
-
       setEmail("");
       setPassword("");
 

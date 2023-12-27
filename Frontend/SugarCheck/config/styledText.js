@@ -46,6 +46,6 @@ const styles = {
   buttonSecondary: {
     fontFamily: "MontserratRegular",
     fontSize: 18,
-    color: colors.active,
+    color: colors.white,
   },
 };
