@@ -15,6 +15,8 @@ import FormItem from "../components/FormItem";
 import colors from "../../config/colors";
 import { ButtonSecondary, Heading, Subheading } from "../../config/styledText";
 import Carousel from "react-native-reanimated-carousel";
+import axios from "axios";
+import getConstants from "../../config/constants";
 
 const { width: viewportWidth } = Dimensions.get("window");
 
@@ -24,21 +26,22 @@ const DiabetesForm = () => {
     gender: "",
     polyuria: "",
     polydipsia: "",
-    suddenWeightLoss: "",
+    "sudden weight loss": "",
     weakness: "",
     polyphagia: "",
-    genitalThrush: "",
-    visualBlurring: "",
+    "genital thrush": "",
+    "visual blurring": "",
     itching: "",
     irritability: "",
-    delayedHealing: "",
-    partialParesis: "",
-    muscleStiffness: "",
+    "delayed healing": "",
+    "partial paresis": "",
+    "muscle stiffness": "",
     alopecia: "",
     obesity: "",
   });
   const [currentIndex, setCurrentIndex] = useState(0);
   const carouselRef = useRef(null);
+  const constants = getConstants();
 
   const formQuestions = [
     { field: "age", label: "Age", type: "input", keyboardType: "numeric" },
@@ -61,7 +64,7 @@ const DiabetesForm = () => {
       options: ["Yes", "No"],
     },
     {
-      field: "suddenWeightLoss",
+      field: "sudden weight loss",
       label: "Sudden Weight Loss",
       type: "radio",
       options: ["Yes", "No"],
@@ -79,13 +82,13 @@ const DiabetesForm = () => {
       options: ["Yes", "No"],
     },
     {
-      field: "genitalThrush",
+      field: "genital thrush",
       label: "Genital Thrush",
       type: "radio",
       options: ["Yes", "No"],
     },
     {
-      field: "visualBlurring",
+      field: "visual blurring",
       label: "Visual Blurring",
       type: "radio",
       options: ["Yes", "No"],
@@ -103,19 +106,19 @@ const DiabetesForm = () => {
       options: ["Yes", "No"],
     },
     {
-      field: "delayedHealing",
+      field: "delayed healing",
       label: "Delayed Healing",
       type: "radio",
       options: ["Yes", "No"],
     },
     {
-      field: "partialParesis",
+      field: "partial paresis",
       label: "Partial Paresis",
       type: "radio",
       options: ["Yes", "No"],
     },
     {
-      field: "muscleStiffness",
+      field: "muscle stiffness",
       label: "Muscle Stiffness",
       type: "radio",
       options: ["Yes", "No"],
@@ -137,19 +140,19 @@ const DiabetesForm = () => {
   const formSteps = [
     {
       key: "step1",
-      questions: formQuestions.slice(0, 3),
+      questions: formQuestions.slice(0, 2),
     },
     {
       key: "step2",
-      questions: formQuestions.slice(3, 6),
+      questions: formQuestions.slice(2, 5),
     },
     {
       key: "step3",
-      questions: formQuestions.slice(6, 9),
+      questions: formQuestions.slice(5, 8),
     },
     {
       key: "step4",
-      questions: formQuestions.slice(9, 12),
+      questions: formQuestions.slice(8, 12),
     },
     {
       key: "step5",
@@ -172,6 +175,21 @@ const DiabetesForm = () => {
 
   const handleSubmit = () => {
     console.log(formData);
+    console.log(`${constants.API_URL}/predict`);
+    axios
+      .post(`${constants.API_URL}/predict`, formData)
+      .then((response) => {
+        console.log("Success:", response.data);
+        Alert.alert(
+          "Prediction",
+          `You are ${
+            response.data[0] === 1 ? "likely" : "unlikely"
+          } to have diabetes.`
+        );
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
   };
 
   const renderQuestion = (question) => {
