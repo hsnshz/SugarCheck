@@ -10,6 +10,11 @@ const colors = {
   complementary: "#008080",
   detail: "#2f4f4f",
   buttonPrimary: "#adb5bd",
+  danger: "#dc3545",
+  disabled: "#ddd",
+  orange: "#ffa726",
+  darkBlue: "#0a2227",
+  green: "#4caf50",
 };
 
 export default colors;

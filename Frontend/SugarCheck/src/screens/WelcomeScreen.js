@@ -9,12 +9,14 @@ import {
   Modal,
   TouchableWithoutFeedback,
   TouchableOpacity,
+  Platform,
 } from "react-native";
 import colors from "../../config/colors";
 import {
   ButtonPrimary,
   ButtonSecondary,
   Heading,
+  Subheading,
 } from "../../config/styledText";
 import { useFocusEffect } from "@react-navigation/native";
 
@@ -62,11 +64,14 @@ const WelcomeScreen = ({ navigation }) => {
     <>
       <View style={styles.container}>
         <Image
-          source={require("../../assets/icons/AppIcon.png")}
+          source={require("../../assets/icons/DarkAppIcon.png")}
           resizeMode="contain"
           style={styles.logo}
         />
         <Heading style={styles.title}>Welcome to SugarCheck</Heading>
+        <Subheading style={styles.subtitle}>
+          Empowering Your Health, One Check at a Time
+        </Subheading>
 
         <Button title="Get Started" onPress={toggleModal} />
         <Modal
@@ -105,10 +110,7 @@ const WelcomeScreen = ({ navigation }) => {
       </View>
       <Animated.View
         pointerEvents={isModalVisible ? "auto" : "none"}
-        style={[
-          styles.overlay,
-          { opacity: fadeAnim }, // Bind opacity to animated value
-        ]}
+        style={[styles.overlay, { opacity: fadeAnim }]}
       />
     </>
   );
@@ -122,12 +124,16 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   logo: {
-    width: 150,
-    height: 150,
-    marginBottom: 20,
+    width: 120,
+    height: 120,
   },
   title: {
-    marginBottom: 20,
+    marginBottom: 15,
+    textAlign: "center",
+  },
+  subtitle: {
+    marginBottom: 25,
+    textAlign: "center",
   },
   centeredView: {
     flex: 1,
@@ -138,7 +144,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "25%",
     backgroundColor: colors.detail,
-    padding: 35,
+    padding: 20,
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#000",
@@ -156,7 +162,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     width: "100%",
     alignItems: "center",
-    margin: 5,
+    marginBottom: 15,
   },
   createAccountButton: {
     backgroundColor: colors.complementary,
@@ -164,7 +170,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     width: "100%",
     alignItems: "center",
-    margin: 5,
+    marginBottom: Platform.OS === "ios" ? 25 : 10,
   },
   overlay: {
     position: "absolute",

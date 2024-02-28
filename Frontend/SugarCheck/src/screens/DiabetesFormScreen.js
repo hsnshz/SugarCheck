@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useLayoutEffect, useEffect } from "react";
 import {
   View,
   Text,
@@ -16,11 +16,23 @@ import colors from "../../config/colors";
 import { ButtonSecondary, Heading, Subheading } from "../../config/styledText";
 import Carousel from "react-native-reanimated-carousel";
 import axios from "axios";
-import getConstants from "../../config/constants";
+import { getConstants, getNgrokUrl } from "../../config/constants";
+import { setHeaderOptions } from "../components/HeaderOptions";
+import { useSelector } from "react-redux";
+import { updateHealthProfile } from "../store/store";
+import { useDispatch } from "react-redux";
 
 const { width: viewportWidth } = Dimensions.get("window");
 
-const DiabetesForm = () => {
+const DiabetesForm = ({ navigation }) => {
+  useLayoutEffect(() => {
+    setHeaderOptions(navigation);
+  }, [navigation]);
+
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user);
+  const token = useSelector((state) => state.token);
+
   const [formData, setFormData] = useState({
     age: "",
     gender: "",
@@ -39,18 +51,37 @@ const DiabetesForm = () => {
     alopecia: "",
     obesity: "",
   });
+
+  useEffect(() => {
+    if (user) {
+      const dob = new Date(user.dob);
+      const currentYear = new Date().getFullYear();
+      const birthYear = dob.getFullYear();
+      let age = currentYear - birthYear;
+      const gender = user.gender;
+
+      if (
+        new Date().getMonth() < dob.getMonth() ||
+        (new Date().getMonth() === dob.getMonth() &&
+          new Date().getDate() < dob.getDate())
+      ) {
+        age--;
+      }
+
+      const updatedFormData = {
+        ...formData,
+        age,
+        gender,
+      };
+
+      setFormData(updatedFormData);
+    }
+  }, [user]);
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const carouselRef = useRef(null);
-  const constants = getConstants();
 
   const formQuestions = [
-    { field: "age", label: "Age", type: "input", keyboardType: "numeric" },
-    {
-      field: "gender",
-      label: "Gender",
-      type: "radio",
-      options: ["Male", "Female"],
-    },
     {
       field: "polyuria",
       label: "Polyuria",
@@ -140,23 +171,23 @@ const DiabetesForm = () => {
   const formSteps = [
     {
       key: "step1",
-      questions: formQuestions.slice(0, 2),
+      questions: formQuestions.slice(0, 3),
     },
     {
       key: "step2",
-      questions: formQuestions.slice(2, 5),
+      questions: formQuestions.slice(3, 6),
     },
     {
       key: "step3",
-      questions: formQuestions.slice(5, 8),
+      questions: formQuestions.slice(6, 9),
     },
     {
       key: "step4",
-      questions: formQuestions.slice(8, 12),
+      questions: formQuestions.slice(9, 12),
     },
     {
       key: "step5",
-      questions: formQuestions.slice(12, 16),
+      questions: formQuestions.slice(12, 14),
     },
   ];
 
@@ -174,17 +205,30 @@ const DiabetesForm = () => {
   };
 
   const handleSubmit = () => {
-    console.log(formData);
-    console.log(`${constants.API_URL}/predict`);
     axios
-      .post(`${constants.API_URL}/predict`, formData)
+      .post(`${getNgrokUrl()}/api/pred/diabetes/${user._id}`, formData, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      })
       .then((response) => {
-        console.log("Success:", response.data);
+        if (response.status === 200) {
+          // Update the user data in the Redux store
+          dispatch(
+            updateHealthProfile({
+              riskFactors: response.data.formattedFormData,
+              riskAssessment: {
+                predictionResult:
+                  response.data[0] === 1 ? "likely" : "unlikely",
+                date: new Date(),
+              },
+            })
+          );
+        }
         Alert.alert(
           "Prediction",
-          `You are ${
-            response.data[0] === 1 ? "likely" : "unlikely"
-          } to have diabetes.`
+          `You are ${response.data.predictionResult} to have diabetes.`
         );
       })
       .catch((error) => {

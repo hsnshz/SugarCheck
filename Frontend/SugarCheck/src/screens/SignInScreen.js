@@ -1,5 +1,5 @@
 import React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   View,
   TextInput,
@@ -8,6 +8,10 @@ import {
   StyleSheet,
   Alert,
   Platform,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Keyboard,
+  Animated,
 } from "react-native";
 import colors from "../../config/colors";
 import {
@@ -15,82 +19,162 @@ import {
   ButtonSecondary,
   Heading,
 } from "../../config/styledText";
+import { CommonActions } from "@react-navigation/native";
+import { getNgrokUrl } from "../../config/constants";
+import axios from "axios";
+import { useDispatch } from "react-redux";
+import { setToken, setUser } from "../store/store";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const SignInScreen = ({ navigation }) => {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  const loginName = "Hassan";
-  const loginEmail = "h@h.com";
-  const loginPswd = "123";
+  const dispatch = useDispatch();
+
+  const [moveAnimation] = useState(new Animated.Value(0));
+
+  const keyboardDidShow = () => {
+    Animated.timing(moveAnimation, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: false,
+    }).start();
+  };
+
+  const keyboardDidHide = () => {
+    Animated.timing(moveAnimation, {
+      toValue: 0,
+      duration: 100,
+      useNativeDriver: false,
+    }).start();
+  };
+
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      "keyboardDidShow",
+      keyboardDidShow
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      "keyboardDidHide",
+      keyboardDidHide
+    );
+
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, []);
 
   const validateInput = () => {
-    // Check if fields are not empty
-    if (email.trim() === "" || password.trim() === "") {
+    if (username.trim() === "" || password.trim() === "") {
       Alert.alert("Invalid input", "Fields cannot be empty");
       return false;
     }
 
-    // Email validation
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (!emailRegex.test(email)) {
-      Alert.alert("Invalid input", "Please enter a valid email");
-      return false;
-    }
-
-    if (email !== loginEmail || password !== loginPswd) {
-      Alert.alert("Invalid input", "Incorrect email or password");
+    const emailOrUsernameRegex =
+      /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$|^[a-zA-Z0-9_]+$/;
+    if (!emailOrUsernameRegex.test(username)) {
+      Alert.alert("Invalid input", "Please enter a valid email or username");
       return false;
     }
 
     return true;
   };
 
-  const handleSubmit = () => {
-    if (validateInput()) {
-      setEmail("");
-      setPassword("");
+  const signIn = async () => {
+    const response = await axios.post(`${getNgrokUrl()}/api/auth/signin`, {
+      username,
+      password,
+    });
 
-      navigation.reset({
-        index: 0,
-        routes: [{ name: "DiabetesForm" }],
-      });
+    if (response.data.error) {
+      throw new Error(response.data.error);
+    } else {
+      // Store the token in AsyncStorage
+      await AsyncStorage.setItem("@token", response.data.token);
+
+      // Store the token in local storage or state management library
+      dispatch(setToken(response.data.token));
+      dispatch(setUser(response.data.user));
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (validateInput()) {
+      try {
+        await signIn();
+        setUsername("");
+        setPassword("");
+
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [
+              {
+                name: "Main",
+              },
+            ],
+          })
+        );
+      } catch (error) {
+        Alert.alert("Error", "Invalid credentials. Please try again.");
+      }
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Image
-        style={styles.logo}
-        source={require("../../assets/icons/AppIcon.png")}
-      />
-      <Heading style={styles.heading}>SugarCheck</Heading>
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
-      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-        <ButtonSecondary>Sign In</ButtonSecondary>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={styles.secondButton}
-        onPress={() => navigation.navigate("SignUp")}
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 25 : 20}
       >
-        <ButtonPrimary>Go to Sign Up</ButtonPrimary>
-      </TouchableOpacity>
-    </View>
+        <Image
+          style={styles.logo}
+          source={require("../../assets/icons/DarkAppIcon.png")}
+        />
+        <Animated.View style={{ transform: [{ translateY: moveAnimation }] }}>
+          <Heading style={styles.heading}>SugarCheck</Heading>
+        </Animated.View>
+
+        <TextInput
+          style={styles.input}
+          placeholder="Email or Username"
+          value={username}
+          onChangeText={setUsername}
+          autoCapitalize="none"
+          returnKeyType="next"
+          onSubmitEditing={() => {
+            this.FirstTextInput.focus();
+          }}
+        />
+        <TextInput
+          ref={(input) => {
+            this.FirstTextInput = input;
+          }}
+          style={styles.input}
+          placeholder="Password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry={true}
+          passwordRules="required: lower; required: upper; required: digit; required: length(8);"
+          returnKeyType="go"
+          onSubmitEditing={handleSubmit}
+        />
+
+        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+          <ButtonSecondary>Sign In</ButtonSecondary>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.secondButton}
+          onPress={() => navigation.navigate("SignUp")}
+        >
+          <ButtonPrimary>Go to Sign Up</ButtonPrimary>
+        </TouchableOpacity>
+      </KeyboardAvoidingView>
+    </TouchableWithoutFeedback>
   );
 };
 
