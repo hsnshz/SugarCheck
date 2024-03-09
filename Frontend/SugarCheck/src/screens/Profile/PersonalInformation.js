@@ -8,6 +8,7 @@ import {
   Button,
   Platform,
   KeyboardAvoidingView,
+  Image,
 } from "react-native";
 import { ButtonSecondary } from "../../../config/styledText";
 import colors from "../../../config/colors";
@@ -17,11 +18,22 @@ import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
 import { getNgrokUrl } from "../../../config/constants";
 import { updateUser } from "../../store/store";
+import Toast from "react-native-fast-toast";
+import * as Haptics from "expo-haptics";
+import Icon from "react-native-vector-icons/AntDesign";
+import * as ImagePicker from "expo-image-picker";
+import { useActionSheet } from "@expo/react-native-action-sheet";
+import { Avatar } from "react-native-elements";
 
-const PersonalInformation = () => {
+const PersonalInformation = ({ navigation }) => {
   const dispatch = useDispatch();
-  const user = useSelector((state) => state.user);
-  const token = useSelector((state) => state.token);
+  const user = useSelector((state) => state.user) || {};
+  const token = useSelector((state) => state.token) || "";
+
+  const [profilePicture, setProfilePicture] = useState(
+    user ? user.profilePicture : ""
+  );
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
 
   const [firstName, setFirstName] = useState(user ? user.firstName : "");
   const [lastName, setLastName] = useState(user ? user.lastName : "");
@@ -30,13 +42,16 @@ const PersonalInformation = () => {
     user && user.dob ? new Date(user.dob) : new Date()
   );
   const [gender, setGender] = useState(
-    user ? user.gender.charAt(0).toUpperCase() + user.gender.slice(1) : ""
+    user ? user.gender?.charAt(0).toUpperCase() + user.gender?.slice(1) : ""
   );
   const [phoneNumber, setPhoneNumber] = useState(user ? user.phoneNumber : "");
   const [username, setUsername] = useState(user ? user.username : "");
   const [show, setShow] = useState(false);
 
   const firstTextInputRef = useRef(null);
+  const toastRef = useRef(null);
+
+  const { showActionSheetWithOptions } = useActionSheet();
 
   const validateInput = () => {
     if (!username) {
@@ -80,7 +95,7 @@ const PersonalInformation = () => {
 
     axios
       .put(
-        `${getNgrokUrl()}/api/update/${user._id}`,
+        `${getNgrokUrl()}/api/profile/update/${user._id}`,
         {
           email,
           phoneNumber,
@@ -103,11 +118,19 @@ const PersonalInformation = () => {
               username,
             })
           );
+
+          toastRef.current.show("Profile updated successfully", {
+            type: "success",
+          });
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         }
-        alert("Profile updated successfully");
       })
       .catch((error) => {
-        alert("An error occurred while updating the profile");
+        console.log(error);
+        toastRef.current.show("An error occurred while updating the profile", {
+          type: "danger",
+        });
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       });
   };
 
@@ -117,13 +140,258 @@ const PersonalInformation = () => {
     }
   }, []);
 
+  useEffect(() => {
+    if (user.profilePicture) {
+      axios
+        .get(`${getNgrokUrl()}/${user.profilePicture}`, {
+          responseType: "blob",
+        })
+        .then((response) => {
+          const url = URL.createObjectURL(response.data);
+
+          setProfilePicture(url);
+          setIsImageLoaded(true);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
+  }, [user.profilePicture]);
+
+  const handleSelectProfilePicture = async () => {
+    const options = [
+      "Take Photo",
+      "Choose from Photos",
+      "Remove Photo",
+      "Cancel",
+    ];
+    const cancelButtonIndex = 3;
+    const destructiveButtonIndex = 2;
+
+    try {
+      showActionSheetWithOptions(
+        {
+          options,
+          cancelButtonIndex,
+          destructiveButtonIndex,
+        },
+        async (buttonIndex) => {
+          switch (buttonIndex) {
+            case 0:
+              // Take Photo
+              const cameraPermission =
+                await ImagePicker.requestCameraPermissionsAsync();
+
+              if (cameraPermission.status !== "granted") {
+                alert("Sorry, we need camera permissions to make this work!");
+                return;
+              }
+
+              let cameraResult = await ImagePicker.launchCameraAsync({
+                allowsEditing: true,
+                aspect: [4, 4],
+                quality: 1,
+              });
+
+              if (!cameraResult.canceled) {
+                if (cameraResult.assets[0].uri) {
+                  setProfilePicture(cameraResult.assets[0].uri);
+
+                  try {
+                    await handleUpdateProfilePicture(
+                      cameraResult.assets[0].uri
+                    );
+                  } catch (error) {
+                    console.error(error);
+                    toastRef.current.show(
+                      "An error occurred while updating the profile picture",
+                      {
+                        type: "danger",
+                      }
+                    );
+                  }
+                }
+              }
+              break;
+
+            case 1:
+              // Choose from Photos
+              const libraryPermission =
+                await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+              if (libraryPermission.status !== "granted") {
+                alert(
+                  "Sorry, we need media library permissions to make this work!"
+                );
+                return;
+              }
+
+              let libraryResult = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsEditing: true,
+                aspect: [4, 4],
+                quality: 1,
+              });
+
+              if (!libraryResult.canceled) {
+                if (libraryResult.assets[0].uri) {
+                  setProfilePicture(libraryResult.assets[0].uri);
+
+                  try {
+                    await handleUpdateProfilePicture(
+                      libraryResult.assets[0].uri
+                    );
+                  } catch (error) {
+                    console.error(error);
+                    toastRef.current.show(
+                      "An error occurred while updating the profile picture",
+                      {
+                        type: "danger",
+                      }
+                    );
+                  }
+                }
+              }
+
+              break;
+
+            case 2:
+              // Remove Photo
+              try {
+                await handleRemoveProfilePicture();
+              } catch (error) {
+                console.error(error);
+                toastRef.current.show(
+                  "An error occurred while removing the profile picture",
+                  {
+                    type: "danger",
+                  }
+                );
+              }
+              break;
+          }
+        }
+      );
+    } catch (error) {
+      console.error(error);
+      toastRef.current.show(
+        "An error occurred while updating the profile picture",
+        {
+          type: "danger",
+        }
+      );
+    }
+  };
+
+  const handleUpdateProfilePicture = async (uri) => {
+    let formData = new FormData();
+    let localUri = Platform.OS === "ios" ? `file://${uri}` : uri;
+    let filename = localUri.split("/").pop();
+
+    // Infer the type of the image
+    let match = /\.(\w+)$/.exec(filename);
+    let type = match ? `image/${match[1]}` : `image`;
+
+    formData.append("photo", { uri: localUri, name: filename, type });
+
+    try {
+      const response = await axios.put(
+        `${getNgrokUrl()}/api/profile/update/${user._id}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      dispatch(
+        updateUser({ profilePicture: response.data.user.profilePicture })
+      );
+
+      toastRef.current.show("Profile picture updated successfully", {
+        type: "success",
+      });
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch (error) {
+      console.error(error);
+      toastRef.current.show(
+        "An error occurred while updating the profile picture",
+        { type: "danger" }
+      );
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    }
+  };
+
+  const handleRemoveProfilePicture = async () => {
+    try {
+      const response = await axios.delete(
+        `${getNgrokUrl()}/api/profile/delete-profile-picture/${user._id}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // Update the Redux store
+      dispatch(updateUser({ profilePicture: null }));
+      setProfilePicture(null);
+      setIsImageLoaded(false);
+
+      toastRef.current.show("Profile picture removed successfully", {
+        type: "success",
+      });
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch (error) {
+      console.error(error);
+      toastRef.current.show(
+        "An error occurred while removing the profile picture",
+        { type: "danger" }
+      );
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    }
+  };
+
   return (
     <KeyboardAvoidingView
-      style={styles.container}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={Platform.OS === "ios" ? 200 : 200}
     >
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Icon name="left" size={30} color={colors.darkBlue} />
+        </TouchableOpacity>
+        <Image
+          source={require("../../../assets/icons/DarkAppIcon.png")}
+          style={styles.logo}
+        />
+        <View style={{ width: 35 }} />
+      </View>
+
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 300 }}
+      >
+        <TouchableOpacity
+          style={styles.btnProfilePicture}
+          onPress={handleSelectProfilePicture}
+        >
+          {profilePicture && isImageLoaded ? (
+            <Image
+              style={styles.profilePicture}
+              source={{ uri: profilePicture }}
+            />
+          ) : (
+            <View style={styles.avatarPicture}>
+              <Text style={styles.avatarText}>
+                {(user.firstName || "A")[0] + (user.lastName || "A")[0]}
+              </Text>
+            </View>
+          )}
+        </TouchableOpacity>
         <Text style={styles.label}>First Name:</Text>
         <TextInput
           style={[styles.input, styles.disabledInput]}
@@ -202,25 +470,63 @@ const PersonalInformation = () => {
           <ButtonSecondary>Update</ButtonSecondary>
         </TouchableOpacity>
       </ScrollView>
+
+      <Toast
+        ref={toastRef}
+        placement="top"
+        style={{ backgroundColor: colors.darkBlue, marginTop: 50 }}
+        fadeInDuration={750}
+        fadeOutDuration={1000}
+        opacity={1}
+        textStyle={{ color: colors.white, fontFamily: "MontserratRegular" }}
+      />
     </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    padding: 20,
+    backgroundColor: colors.background,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: colors.background,
+    marginTop: 60,
     padding: 20,
   },
+  logo: {
+    width: 50,
+    height: 50,
+  },
+  btnProfilePicture: {
+    backgroundColor: colors.disabled,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    alignSelf: "center",
+  },
+  profilePicture: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+  },
   label: {
+    fontFamily: "MontserratRegular",
     fontSize: 18,
     marginVertical: 10,
   },
   input: {
+    fontFamily: "MontserratRegular",
+    fontSize: 16,
+    width: "100%",
+    height: 40,
+    borderColor: colors.gray,
     borderWidth: 1,
-    borderColor: "#ddd",
+    marginBottom: 10,
     padding: 10,
-    fontSize: 18,
-    borderRadius: 6,
     backgroundColor: colors.white,
   },
   disabledInput: {
@@ -228,12 +534,13 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: colors.complementary,
-    padding: 10,
-    borderRadius: 6,
-    alignItems: "center",
+    padding: 15,
+    margin: 10,
     marginTop: 40,
-    width: "80%",
+    width: "60%",
     alignSelf: "center",
+    alignItems: "center",
+    borderRadius: 5,
   },
   dobContainer: {
     flexDirection: "row",
@@ -250,6 +557,19 @@ const styles = StyleSheet.create({
   btnAndroid: {
     flex: 0.9,
     marginLeft: 60,
+  },
+  avatarPicture: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: colors.disabled,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  avatarText: {
+    color: colors.white,
+    fontSize: 40,
+    fontFamily: "MontserratBold",
   },
 });
 

@@ -95,6 +95,7 @@ const persistConfig = {
   key: "root",
   storage: AsyncStorage,
   whitelist: ["auth"], // only auth will be persisted
+  timeout: 10000,
 };
 
 const persistedReducer = persistReducer(persistConfig, authSlice.reducer);
@@ -104,6 +105,7 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: false,
+      immutableCheck: false,
     }),
 });
 

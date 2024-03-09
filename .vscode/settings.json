@@ -1,3 +1,5 @@
 {
-  "python.analysis.extraPaths": ["./Backend/ML-Models"]
+  "python.analysis.extraPaths": [
+    "./Backend/ML-Models"
+  ]
 }

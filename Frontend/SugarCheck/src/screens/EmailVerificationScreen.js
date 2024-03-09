@@ -18,6 +18,7 @@ import { getNgrokUrl } from "../../config/constants";
 import { CommonActions } from "@react-navigation/native";
 import { useSelector } from "react-redux";
 import colors from "../../config/colors";
+import Icon from "react-native-vector-icons/AntDesign";
 
 const EmailVerificationScreen = ({ navigation }) => {
   const user = useSelector((state) => state.user);
@@ -67,44 +68,50 @@ const EmailVerificationScreen = ({ navigation }) => {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <SafeAreaView style={styles.container}>
-        <View>
+      <View style={{ flex: 1 }}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Icon name="left" size={30} color={colors.darkBlue} />
+          </TouchableOpacity>
           <Image
-            style={styles.logo}
             source={require("../../assets/icons/DarkAppIcon.png")}
+            style={styles.logo}
           />
-          <Heading style={styles.heading}>SugarCheck</Heading>
+          <View style={{ width: 35 }} />
         </View>
-        <Text style={styles.infoTxt}>
-          Please enter the verification code sent to your email:
-        </Text>
-        <View style={styles.inputContainer}>
-          {code.map((digit, index) => (
-            <TextInput
-              key={index}
-              style={styles.input}
-              maxLength={1}
-              keyboardType="numeric"
-              value={digit}
-              ref={inputRefs[index]}
-              onChangeText={(text) => {
-                const newCode = [...code];
-                newCode[index] = text;
-                setCode(newCode);
 
-                if (text !== "" && inputRefs[index + 1]) {
-                  inputRefs[index + 1].current.focus();
-                } else if (index === inputRefs.length - 1) {
-                  Keyboard.dismiss();
-                }
-              }}
-            />
-          ))}
-        </View>
-        <TouchableOpacity style={styles.btnVerify} onPress={verifyEmail}>
-          <Text style={styles.btnText}>Verify Email</Text>
-        </TouchableOpacity>
-      </SafeAreaView>
+        <SafeAreaView style={styles.container}>
+          <Text style={styles.infoTxt}>
+            Please enter the verification code sent to your email:
+          </Text>
+          <View style={styles.inputContainer}>
+            {code.map((digit, index) => (
+              <TextInput
+                key={index}
+                style={styles.input}
+                maxLength={1}
+                keyboardType="numeric"
+                value={digit}
+                ref={inputRefs[index]}
+                onChangeText={(text) => {
+                  const newCode = [...code];
+                  newCode[index] = text;
+                  setCode(newCode);
+
+                  if (text !== "" && inputRefs[index + 1]) {
+                    inputRefs[index + 1].current.focus();
+                  } else if (index === inputRefs.length - 1) {
+                    Keyboard.dismiss();
+                  }
+                }}
+              />
+            ))}
+          </View>
+          <TouchableOpacity style={styles.btnVerify} onPress={verifyEmail}>
+            <Text style={styles.btnText}>Verify Email</Text>
+          </TouchableOpacity>
+        </SafeAreaView>
+      </View>
     </TouchableWithoutFeedback>
   );
 };
@@ -116,11 +123,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: colors.background,
   },
-  logo: {
-    width: 100,
-    height: 100,
-    alignSelf: "center",
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: colors.background,
+    marginTop: 60,
+    padding: 20,
   },
+  logo: {
+    width: 50,
+    height: 50,
+  },
+
   heading: {
     marginBottom: 60,
   },
@@ -145,7 +160,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
   btnVerify: {
-    backgroundColor: colors.navbar,
+    backgroundColor: colors.complementary,
     padding: 15,
     borderRadius: 5,
   },

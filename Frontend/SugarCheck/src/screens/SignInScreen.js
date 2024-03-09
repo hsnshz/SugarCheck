@@ -12,6 +12,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   Animated,
+  Text,
 } from "react-native";
 import colors from "../../config/colors";
 import {
@@ -25,13 +26,16 @@ import axios from "axios";
 import { useDispatch } from "react-redux";
 import { setToken, setUser } from "../store/store";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Icon from "react-native-vector-icons/AntDesign";
+import * as Haptics from "expo-haptics";
 
 const SignInScreen = ({ navigation }) => {
+  const dispatch = useDispatch();
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  const dispatch = useDispatch();
-
+  const [errorMessage, setErrorMessage] = useState("");
   const [moveAnimation] = useState(new Animated.Value(0));
 
   const keyboardDidShow = () => {
@@ -68,14 +72,14 @@ const SignInScreen = ({ navigation }) => {
 
   const validateInput = () => {
     if (username.trim() === "" || password.trim() === "") {
-      Alert.alert("Invalid input", "Fields cannot be empty");
+      setErrorMessage("Fields cannot be empty");
       return false;
     }
 
     const emailOrUsernameRegex =
       /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$|^[a-zA-Z0-9_]+$/;
     if (!emailOrUsernameRegex.test(username)) {
-      Alert.alert("Invalid input", "Please enter a valid email or username");
+      setErrorMessage("Please enter a valid email or username");
       return false;
     }
 
@@ -106,6 +110,8 @@ const SignInScreen = ({ navigation }) => {
         await signIn();
         setUsername("");
         setPassword("");
+        setErrorMessage("");
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
         navigation.dispatch(
           CommonActions.reset({
@@ -118,62 +124,86 @@ const SignInScreen = ({ navigation }) => {
           })
         );
       } catch (error) {
-        Alert.alert("Error", "Invalid credentials. Please try again.");
+        setErrorMessage("Invalid credentials. Please try again.");
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       }
     }
   };
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <KeyboardAvoidingView
-        style={styles.container}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 25 : 20}
-      >
-        <Image
-          style={styles.logo}
-          source={require("../../assets/icons/DarkAppIcon.png")}
-        />
-        <Animated.View style={{ transform: [{ translateY: moveAnimation }] }}>
-          <Heading style={styles.heading}>SugarCheck</Heading>
-        </Animated.View>
+      <View style={{ flex: 1 }}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Icon name="left" size={30} color={colors.darkBlue} />
+          </TouchableOpacity>
+          <View style={{ width: 35 }} />
+        </View>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Email or Username"
-          value={username}
-          onChangeText={setUsername}
-          autoCapitalize="none"
-          returnKeyType="next"
-          onSubmitEditing={() => {
-            this.FirstTextInput.focus();
-          }}
-        />
-        <TextInput
-          ref={(input) => {
-            this.FirstTextInput = input;
-          }}
-          style={styles.input}
-          placeholder="Password"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry={true}
-          passwordRules="required: lower; required: upper; required: digit; required: length(8);"
-          returnKeyType="go"
-          onSubmitEditing={handleSubmit}
-        />
-
-        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-          <ButtonSecondary>Sign In</ButtonSecondary>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.secondButton}
-          onPress={() => navigation.navigate("SignUp")}
+        <KeyboardAvoidingView
+          style={styles.container}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 25 : 20}
         >
-          <ButtonPrimary>Go to Sign Up</ButtonPrimary>
-        </TouchableOpacity>
-      </KeyboardAvoidingView>
+          <Image
+            style={styles.logo}
+            source={require("../../assets/icons/DarkAppIcon.png")}
+          />
+          <Animated.View style={{ transform: [{ translateY: moveAnimation }] }}>
+            <Heading style={styles.heading}>SugarCheck</Heading>
+          </Animated.View>
+
+          <TextInput
+            style={styles.input}
+            placeholder="Email or Username"
+            value={username}
+            onChangeText={setUsername}
+            autoCapitalize="none"
+            returnKeyType="next"
+            onSubmitEditing={() => {
+              this.FirstTextInput.focus();
+            }}
+          />
+          <TextInput
+            ref={(input) => {
+              this.FirstTextInput = input;
+            }}
+            style={styles.input}
+            placeholder="Password"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry={true}
+            returnKeyType="go"
+            onSubmitEditing={handleSubmit}
+          />
+
+          {errorMessage && <Text style={styles.errorText}>{errorMessage}</Text>}
+
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleSubmit}
+            activeOpacity={0.8}
+          >
+            <ButtonSecondary>Sign In</ButtonSecondary>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.btnSignUp}
+            onPress={() => navigation.navigate("SignUp")}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.btnSignUpText}>Go to Sign Up</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.btnForgot}
+            activeOpacity={0.8}
+            onPress={() => navigation.navigate("ResetPasswordScreen")}
+          >
+            <Text style={styles.btnForgotText}>Forgot Password?</Text>
+          </TouchableOpacity>
+        </KeyboardAvoidingView>
+      </View>
     </TouchableWithoutFeedback>
   );
 };
@@ -185,6 +215,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: colors.background,
   },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: colors.background,
+    marginTop: 60,
+    padding: 20,
+  },
   logo: {
     width: 100,
     height: 100,
@@ -193,10 +231,11 @@ const styles = StyleSheet.create({
     fontFamily: "MontserratRegular",
     width: "80%",
     height: 40,
-    borderColor: "gray",
+    borderColor: colors.gray,
     borderWidth: 1,
     marginBottom: 10,
     padding: 10,
+    backgroundColor: colors.white,
   },
   button: {
     backgroundColor: colors.complementary,
@@ -209,12 +248,42 @@ const styles = StyleSheet.create({
   secondButton: {
     padding: 10,
     borderRadius: 5,
-    width: "40%",
+    width: "80%",
     alignItems: "center",
     marginTop: 15,
   },
   heading: {
     marginBottom: 50,
+  },
+  btnForgot: {
+    marginTop: 20,
+  },
+  btnForgotText: {
+    fontFamily: "MontserratRegular",
+    fontSize: 16,
+    color: colors.complementary,
+  },
+  btnSignUp: {
+    marginTop: 0,
+    padding: 10,
+    width: "40%",
+    borderColor: colors.complementary,
+    borderWidth: 1,
+    borderRadius: 5,
+    margin: Platform.OS === "android" ? 20 : 15,
+  },
+  btnSignUpText: {
+    fontFamily: "MontserratRegular",
+    fontSize: 16,
+    textAlign: "center",
+    color: colors.complementary,
+  },
+  errorText: {
+    fontFamily: "MontserratRegular",
+    fontSize: 16,
+    color: colors.danger,
+    marginVertical: 10,
+    marginBottom: 20,
   },
 });
 

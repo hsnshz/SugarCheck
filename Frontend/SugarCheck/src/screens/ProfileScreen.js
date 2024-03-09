@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { setHeaderOptions } from "../components/HeaderOptions";
 import Icon from "react-native-vector-icons/FontAwesome";
 import colors from "../../config/colors";
@@ -11,6 +11,9 @@ import * as SecureStore from "expo-secure-store";
 import { useNavigation } from "@react-navigation/native";
 import { ScrollView } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+import { getNgrokUrl } from "../../config/constants";
+import { useSelector } from "react-redux";
 
 const SettingsItem = ({ title, iconName, textStyle, onPress }) => (
   <TouchableOpacity style={styles.itemContainer} onPress={onPress}>
@@ -25,6 +28,30 @@ const SettingsItem = ({ title, iconName, textStyle, onPress }) => (
 const ProfileScreen = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
+  const user = useSelector((state) => state.user) || {};
+
+  const [profilePicture, setProfilePicture] = useState(null);
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
+
+  useEffect(() => {
+    if (user.profilePicture) {
+      axios
+        .get(`${getNgrokUrl()}/${user.profilePicture}`, {
+          responseType: "blob",
+        })
+        .then((response) => {
+          const url = URL.createObjectURL(response.data);
+
+          setProfilePicture(url);
+          setIsImageLoaded(true);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    } else {
+      setProfilePicture(null);
+    }
+  }, [user.profilePicture]);
 
   const handleSignOut = async () => {
     try {
@@ -57,19 +84,44 @@ const ProfileScreen = () => {
   return (
     <ScrollView>
       <View style={styles.container}>
-        <View style={styles.section}>
-          <SettingsItem
-            title="Personal Information"
-            iconName="user"
-            onPress={() =>
-              navigation.navigate("Profile", { screen: "PersonalInformation" })
-            }
-          />
-        </View>
+        <TouchableOpacity
+          style={styles.section}
+          onPress={() =>
+            navigation.navigate("Profile", {
+              screen: "PersonalInformation",
+            })
+          }
+          activeOpacity={0.7}
+        >
+          <View style={styles.profileSection}>
+            {profilePicture && isImageLoaded ? (
+              <Image
+                style={styles.profilePicture}
+                source={{ uri: profilePicture }}
+              />
+            ) : (
+              <View style={styles.avatarPicture}>
+                <Text style={styles.avatarText}>
+                  {(user.firstName || "A")[0] + (user.lastName || "A")[0]}
+                </Text>
+              </View>
+            )}
+
+            <View style={styles.personalInfo}>
+              <Text style={styles.personalInfoNameText}>
+                {user.firstName} {user.lastName}
+              </Text>
+              <Text style={styles.personalInfoText}>{user.email}</Text>
+            </View>
+
+            <Icon name="angle-right" size={24} color={colors.black} />
+          </View>
+        </TouchableOpacity>
+
         <View style={styles.section}>
           <SettingsItem
             title="Health Profile"
-            iconName="heartbeat"
+            iconName="stethoscope"
             onPress={() =>
               navigation.navigate("Profile", { screen: "HealthProfile" })
             }
@@ -85,24 +137,22 @@ const ProfileScreen = () => {
             onPress={() => {}}
           />
           <SettingsItem
-            title="Change Password"
-            iconName="lock"
-            onPress={() => {}}
-          />
-          <SettingsItem
             title="Terms & Conditions"
             iconName="file-text"
             onPress={() => {}}
           />
           <SettingsItem
-            title="Account Settings"
-            iconName="gear"
-            onPress={() => {}}
+            title="Change Password"
+            iconName="lock"
+            onPress={() =>
+              navigation.navigate("Profile", { screen: "ChangePassword" })
+            }
           />
         </View>
-        <View style={styles.section}>
+
+        {/* <View style={styles.section}>
           <SettingsItem
-            textStyle={styles.logout}
+            textStyle={styles.delete}
             title="Log Out"
             iconName="sign-out"
             onPress={() =>
@@ -122,6 +172,17 @@ const ProfileScreen = () => {
                 ],
                 { cancelable: false }
               )
+            }
+          />
+        </View> */}
+
+        <View style={styles.section}>
+          <SettingsItem
+            textStyle={styles.delete}
+            title="Delete Account"
+            iconName="trash"
+            onPress={() =>
+              navigation.navigate("Profile", { screen: "DeleteAccount" })
             }
           />
         </View>
@@ -153,10 +214,49 @@ const styles = StyleSheet.create({
   itemText: {
     flex: 1,
     marginLeft: 25,
-    fontSize: 16,
+    fontSize: 14,
+    fontFamily: "MontserratRegular",
   },
-  logout: {
+  delete: {
     color: colors.danger,
+    fontFamily: "MontserratBold",
+  },
+  profileSection: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 20,
+  },
+  profilePicture: {
+    width: 75,
+    height: 75,
+    borderRadius: 75 / 2,
+    marginRight: 20,
+  },
+  personalInfo: {
+    flex: 1,
+    marginLeft: 15,
+  },
+  personalInfoNameText: {
+    fontSize: 20,
+    fontFamily: "MontserratBold",
+  },
+  personalInfoText: {
+    marginTop: 5,
+    fontSize: 16,
+    fontFamily: "MontserratRegular",
+  },
+  avatarPicture: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: colors.disabled,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  avatarText: {
+    color: colors.white,
+    fontSize: 40,
+    fontFamily: "MontserratBold",
   },
 });
 

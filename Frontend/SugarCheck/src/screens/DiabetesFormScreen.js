@@ -306,39 +306,37 @@ const DiabetesForm = ({ navigation }) => {
   };
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <SafeAreaView style={styles.safeArea}>
-        <View style={styles.header}>
-          <Heading>Diabetes Prediction</Heading>
-          <Subheading style={styles.subheaderText}>
-            Please enter to the best of your knowledge to receive a prediction
-          </Subheading>
-        </View>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.header}>
+        <Heading>Diabetes Prediction</Heading>
+        <Subheading style={styles.subheaderText}>
+          Please enter to the best of your knowledge to receive a prediction
+        </Subheading>
+      </View>
 
-        <Carousel
-          mode="horizontal-stack"
-          modeConfig={{ snapDirection: "left" }}
-          ref={carouselRef}
-          data={formSteps}
-          renderItem={renderItem}
-          width={viewportWidth}
-          height={400}
-          loop={false}
-          lockScrollWhileSnapping
-          onSnapToItem={(index) => {
-            if (isStepComplete(currentIndex)) {
-              setCurrentIndex(index);
-            } else if (index > currentIndex) {
-              carouselRef.current?.scrollTo({
-                index: currentIndex,
-                animated: true,
-              });
-              Alert.alert("Please fill out all fields to continue");
-            }
-          }}
-        />
-      </SafeAreaView>
-    </TouchableWithoutFeedback>
+      <Carousel
+        mode="horizontal-stack"
+        modeConfig={{ snapDirection: "left" }}
+        ref={carouselRef}
+        data={formSteps}
+        renderItem={renderItem}
+        width={viewportWidth}
+        height={400}
+        loop={false}
+        lockScrollWhileSnapping
+        // onSnapToItem={(index) => {
+        //   if (isStepComplete(currentIndex)) {
+        //     setCurrentIndex(index);
+        //   } else if (index > currentIndex) {
+        //     carouselRef.current?.scrollTo({
+        //       index: currentIndex,
+        //       animated: true,
+        //     });
+        //     Alert.alert("Please fill out all fields to continue");
+        //   }
+        // }}
+      />
+    </SafeAreaView>
   );
 };
 
@@ -369,7 +367,6 @@ const styles = StyleSheet.create({
     marginBottom: 25,
   },
   inputLabel: {
-    // flex: 1,
     width: 110,
     fontFamily: "MontserratRegular",
     fontSize: 18,
