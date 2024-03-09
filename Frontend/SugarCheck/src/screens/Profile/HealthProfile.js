@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   KeyboardAvoidingView,
+  Image,
 } from "react-native";
 import { ButtonSecondary } from "../../../config/styledText";
 import colors from "../../../config/colors";
@@ -14,8 +15,11 @@ import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
 import { getNgrokUrl } from "../../../config/constants";
 import { updateHealthProfile } from "../../store/store";
+import Toast from "react-native-fast-toast";
+import * as Haptics from "expo-haptics";
+import Icon from "react-native-vector-icons/AntDesign";
 
-const HealthProfile = () => {
+const HealthProfile = ({ navigation }) => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
   const token = useSelector((state) => state.token);
@@ -37,6 +41,7 @@ const HealthProfile = () => {
   const secondTextInputRef = useRef(null);
   const thirdTextInputRef = useRef(null);
   const fourthTextInputRef = useRef(null);
+  const toastRef = useRef(null);
 
   useEffect(() => {
     if (height && weight) {
@@ -78,22 +83,42 @@ const HealthProfile = () => {
               medications,
             })
           );
+
+          toastRef.current.show("Health Profile updated successfully", {
+            type: "success",
+          });
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         }
-        alert("Health Profile updated successfully");
       })
       .catch((error) => {
         console.error("Error:", error);
-        alert("An error occurred while updating the profile");
+        toastRef.current.show("An error occurred while updating the profile", {
+          type: "danger",
+        });
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       });
   };
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={Platform.OS === "ios" ? 200 : 200}
     >
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Icon name="left" size={30} color={colors.darkBlue} />
+        </TouchableOpacity>
+        <Image
+          source={require("../../../assets/icons/DarkAppIcon.png")}
+          style={styles.logo}
+        />
+        <View style={{ width: 35 }} />
+      </View>
+
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 300 }}
+      >
         <Text style={styles.label}>Height (cm):</Text>
         <TextInput
           style={styles.input}
@@ -165,6 +190,16 @@ const HealthProfile = () => {
           <ButtonSecondary>Update</ButtonSecondary>
         </TouchableOpacity>
       </ScrollView>
+
+      <Toast
+        ref={toastRef}
+        placement="top"
+        style={{ backgroundColor: colors.darkBlue, marginTop: 50 }}
+        fadeInDuration={750}
+        fadeOutDuration={1000}
+        opacity={1}
+        textStyle={{ color: colors.white, fontFamily: "MontserratRegular" }}
+      />
     </KeyboardAvoidingView>
   );
 };
@@ -172,25 +207,42 @@ const HealthProfile = () => {
 const styles = StyleSheet.create({
   container: {
     padding: 20,
+    backgroundColor: colors.background,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: colors.background,
+    marginTop: 60,
+    padding: 20,
+  },
+  logo: {
+    width: 50,
+    height: 50,
   },
   label: {
+    fontFamily: "MontserratRegular",
     fontSize: 18,
     marginVertical: 10,
   },
   input: {
+    fontFamily: "MontserratRegular",
+    fontSize: 16,
+    width: "100%",
+    height: 40,
+    borderColor: colors.gray,
     borderWidth: 1,
-    borderColor: "#ddd",
+    marginBottom: 10,
     padding: 10,
-    fontSize: 18,
-    borderRadius: 6,
     backgroundColor: colors.white,
   },
   largeInput: {
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: colors.gray,
     padding: 10,
-    fontSize: 18,
-    borderRadius: 6,
+    fontSize: 16,
+    fontFamily: "MontserratRegular",
     backgroundColor: colors.white,
     height: 100,
   },
@@ -199,12 +251,13 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: colors.complementary,
-    padding: 10,
-    borderRadius: 6,
-    alignItems: "center",
+    padding: 15,
+    margin: 10,
     marginTop: 40,
-    width: "80%",
+    width: "60%",
     alignSelf: "center",
+    alignItems: "center",
+    borderRadius: 5,
   },
   dobContainer: {
     flexDirection: "row",

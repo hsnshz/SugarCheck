@@ -7,6 +7,7 @@ import { Alert } from "react-native";
 import { CommonActions } from "@react-navigation/native";
 import * as SecureStore from "expo-secure-store";
 import { signOut, persistor } from "../store/store";
+import colors from "../../config/colors";
 
 const SignOutButton = () => {
   const dispatch = useDispatch();
@@ -40,6 +41,7 @@ const SignOutButton = () => {
   return (
     <DrawerItem
       label="Sign Out"
+      labelStyle={{ color: colors.danger }}
       onPress={() =>
         Alert.alert(
           "Sign Out",
@@ -59,7 +61,7 @@ const SignOutButton = () => {
         )
       }
       icon={({ color, size }) => (
-        <Ionicons name="ios-log-out" color={color} size={size} />
+        <Ionicons name="ios-log-out" color={colors.danger} size={size} />
       )}
     />
   );

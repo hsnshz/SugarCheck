@@ -11,7 +11,13 @@ import colors from "../../config/colors";
 import Icon from "react-native-vector-icons/AntDesign";
 import { PanGestureHandler, State } from "react-native-gesture-handler";
 
-const Sheet = ({ visible, children, onRequestClose }) => {
+const Sheet = ({
+  visible,
+  children,
+  onRequestClose,
+  height = "40%",
+  backgroundColor = colors.disabled,
+}) => {
   const translateY = new Animated.Value(0);
 
   const onGestureEvent = Animated.event(
@@ -48,7 +54,9 @@ const Sheet = ({ visible, children, onRequestClose }) => {
           <TouchableWithoutFeedback onPress={onRequestClose}>
             <View style={styles.container}>
               <TouchableWithoutFeedback>
-                <View style={styles.modalContent}>
+                <View
+                  style={[styles.modalContent, { height, backgroundColor }]}
+                >
                   <TouchableOpacity
                     style={styles.closeIcon}
                     onPress={onRequestClose}

@@ -8,6 +8,7 @@ import { RootStackNavigator } from "./src/navigation/AppNavigator";
 import { Provider } from "react-redux";
 import { store, persistor } from "./src/store/store";
 import { PersistGate } from "redux-persist/integration/react";
+import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 
 export default function App() {
   let [fontsLoaded] = useFonts(fonts);
@@ -21,13 +22,15 @@ export default function App() {
   }
 
   return (
-    <Provider store={store}>
-      <PersistGate loading={null} persistor={persistor}>
-        <NavigationContainer>
-          <RootStackNavigator />
-        </NavigationContainer>
-      </PersistGate>
-    </Provider>
+    <ActionSheetProvider>
+      <Provider store={store}>
+        <PersistGate loading={null} persistor={persistor}>
+          <NavigationContainer>
+            <RootStackNavigator />
+          </NavigationContainer>
+        </PersistGate>
+      </Provider>
+    </ActionSheetProvider>
   );
 }
 

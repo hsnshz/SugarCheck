@@ -21,7 +21,7 @@ import axios from "axios";
 import { getNgrokUrl } from "../../config/constants";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useDispatch, useSelector } from "react-redux";
-import { addA1cReadingSlice } from "../store/store";
+import { addGlucoseValueSlice, addA1cReadingSlice } from "../store/store";
 import ChartComponent from "../components/ChartComponent";
 import ListComponent from "../components/ListComponent";
 import AntDesign from "react-native-vector-icons/AntDesign";
@@ -34,8 +34,8 @@ const GlucoseMonitorScreen = ({ navigation }) => {
   }, [navigation]);
 
   const dispatch = useDispatch();
-  const user = useSelector((state) => state.user);
-  const token = useSelector((state) => state.token);
+  const user = useSelector((state) => state.user) || {};
+  const token = useSelector((state) => state.token) || {};
 
   const [valuesPerDay, setValuesPerDay] = useState({});
   const [animation, setAnimation] = useState(new Animated.Value(0));
@@ -60,12 +60,14 @@ const GlucoseMonitorScreen = ({ navigation }) => {
   const [times, setTimes] = useState([]);
   const [buttonDisabled, setButtonDisabled] = useState(false);
 
-  const [bmi] = useState(user.healthProfile.bmi ? user.healthProfile.bmi : 0);
+  const [bmi] = useState(user?.healthProfile?.bmi ? user.healthProfile.bmi : 0);
   const [age] = useState(
-    user.healthProfile.riskFactors.age ? user.healthProfile.riskFactors.age : 0
+    user?.healthProfile?.riskFactors?.age
+      ? user.healthProfile.riskFactors.age
+      : 0
   );
   const [gender] = useState(
-    user ? user.gender.charAt(0).toUpperCase() + user.gender.slice(1) : ""
+    user ? user?.gender?.charAt(0).toUpperCase() + user?.gender?.slice(1) : ""
   );
   const [A1cReading, setA1cReading] = useState(0);
 

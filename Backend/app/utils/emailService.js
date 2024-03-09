@@ -24,4 +24,20 @@ const sendVerificationEmail = (email, code) => {
   }
 };
 
-export { sendVerificationEmail };
+const sendPasswordResetEmail = (email, code) => {
+  try {
+    const mailOptions = {
+      from: "SugarCheck App <no-reply@sugarcheck.com>",
+      to: email,
+      subject: "Password Reset Code for SugarCheck",
+      text: `Use the following code to reset your password in the app: ${code}`,
+      html: `<p>Use the following code to reset your password in the app: <b>${code}</b></p>`,
+    };
+
+    return transporter.sendMail(mailOptions);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export { sendVerificationEmail, sendPasswordResetEmail };

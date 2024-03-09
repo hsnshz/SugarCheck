@@ -10,6 +10,7 @@ import {
   TouchableWithoutFeedback,
   TouchableOpacity,
   Platform,
+  Text,
 } from "react-native";
 import colors from "../../config/colors";
 import {
@@ -73,7 +74,10 @@ const WelcomeScreen = ({ navigation }) => {
           Empowering Your Health, One Check at a Time
         </Subheading>
 
-        <Button title="Get Started" onPress={toggleModal} />
+        <TouchableOpacity style={styles.btnStart} onPress={toggleModal}>
+          <Text style={styles.btnText}>Get Started</Text>
+        </TouchableOpacity>
+
         <Modal
           animationType="slide"
           transparent={true}
@@ -143,7 +147,7 @@ const styles = StyleSheet.create({
   modalContent: {
     width: "100%",
     height: "25%",
-    backgroundColor: colors.detail,
+    backgroundColor: colors.darkBlue,
     padding: 20,
     alignItems: "center",
     justifyContent: "center",
@@ -180,6 +184,14 @@ const styles = StyleSheet.create({
     bottom: 0,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     zIndex: 10,
+  },
+  btnStart: {
+    padding: 5,
+    alignItems: "center",
+  },
+  btnText: {
+    color: colors.complementary,
+    fontSize: 18,
   },
 });
 

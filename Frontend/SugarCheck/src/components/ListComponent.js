@@ -22,7 +22,6 @@ import { updateGlucoseValueSlice } from "../store/store.js";
 import { getNgrokUrl } from "../../config/constants";
 import Dialog from "react-native-dialog";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { set } from "lodash";
 
 const screenWidth = Dimensions.get("window").width;
 
