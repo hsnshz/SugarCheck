@@ -1,5 +1,5 @@
 import React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   View,
   TextInput,
@@ -8,6 +8,11 @@ import {
   StyleSheet,
   Alert,
   Platform,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Keyboard,
+  Animated,
+  Text,
 } from "react-native";
 import colors from "../../config/colors";
 import {
@@ -15,82 +20,195 @@ import {
   ButtonSecondary,
   Heading,
 } from "../../config/styledText";
+import { CommonActions } from "@react-navigation/native";
+import { getNgrokUrl } from "../../config/constants";
+import axios from "axios";
+import { useDispatch } from "react-redux";
+import { setToken } from "../store/slices/authSlice";
+import { setUser } from "../store/slices/userSlice";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Icon from "react-native-vector-icons/AntDesign";
+import * as Haptics from "expo-haptics";
 
 const SignInScreen = ({ navigation }) => {
-  const [email, setEmail] = useState("");
+  const dispatch = useDispatch();
+
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  const loginName = "Hassan";
-  const loginEmail = "h@h.com";
-  const loginPswd = "123";
+  const [errorMessage, setErrorMessage] = useState("");
+  const [moveAnimation] = useState(new Animated.Value(0));
+
+  const keyboardDidShow = () => {
+    Animated.timing(moveAnimation, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: false,
+    }).start();
+  };
+
+  const keyboardDidHide = () => {
+    Animated.timing(moveAnimation, {
+      toValue: 0,
+      duration: 100,
+      useNativeDriver: false,
+    }).start();
+  };
+
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      "keyboardDidShow",
+      keyboardDidShow
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      "keyboardDidHide",
+      keyboardDidHide
+    );
+
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, []);
 
   const validateInput = () => {
-    // Check if fields are not empty
-    if (email.trim() === "" || password.trim() === "") {
-      Alert.alert("Invalid input", "Fields cannot be empty");
+    if (username.trim() === "" || password.trim() === "") {
+      setErrorMessage("Fields cannot be empty");
       return false;
     }
 
-    // Email validation
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (!emailRegex.test(email)) {
-      Alert.alert("Invalid input", "Please enter a valid email");
-      return false;
-    }
-
-    if (email !== loginEmail || password !== loginPswd) {
-      Alert.alert("Invalid input", "Incorrect email or password");
+    const emailOrUsernameRegex =
+      /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$|^[a-zA-Z0-9_]+$/;
+    if (!emailOrUsernameRegex.test(username)) {
+      setErrorMessage("Please enter a valid email or username");
       return false;
     }
 
     return true;
   };
 
-  const handleSubmit = () => {
-    if (validateInput()) {
-      setEmail("");
-      setPassword("");
+  const signIn = async () => {
+    const response = await axios.post(`${getNgrokUrl()}/api/auth/signin`, {
+      username,
+      password,
+    });
 
-      navigation.reset({
-        index: 0,
-        routes: [{ name: "DiabetesForm" }],
-      });
+    if (response.data.error) {
+      throw new Error(response.data.error);
+    } else {
+      // Store the token in AsyncStorage
+      await AsyncStorage.setItem("@token", response.data.token);
+
+      // Store the token in local storage or state management library
+      dispatch(setToken(response.data.token));
+      dispatch(setUser(response.data.user));
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (validateInput()) {
+      try {
+        await signIn();
+        setUsername("");
+        setPassword("");
+        setErrorMessage("");
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [
+              {
+                name: "Main",
+              },
+            ],
+          })
+        );
+      } catch (error) {
+        setErrorMessage("Invalid credentials. Please try again.");
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      }
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Image
-        style={styles.logo}
-        source={require("../../assets/icons/AppIcon.png")}
-      />
-      <Heading style={styles.heading}>SugarCheck</Heading>
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
-      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-        <ButtonSecondary>Sign In</ButtonSecondary>
-      </TouchableOpacity>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={{ flex: 1 }}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Icon name="left" size={30} color={colors.darkBlue} />
+          </TouchableOpacity>
+          <View style={{ width: 35 }} />
+        </View>
 
-      <TouchableOpacity
-        style={styles.secondButton}
-        onPress={() => navigation.navigate("SignUp")}
-      >
-        <ButtonPrimary>Go to Sign Up</ButtonPrimary>
-      </TouchableOpacity>
-    </View>
+        <KeyboardAvoidingView
+          style={styles.container}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 25 : 20}
+        >
+          <Image
+            style={styles.logo}
+            source={require("../../assets/icons/DarkAppIcon.png")}
+          />
+          <Animated.View style={{ transform: [{ translateY: moveAnimation }] }}>
+            <Heading style={styles.heading}>SugarCheck</Heading>
+          </Animated.View>
+
+          <TextInput
+            style={styles.input}
+            placeholder="Email or Username"
+            value={username}
+            onChangeText={setUsername}
+            autoCapitalize="none"
+            returnKeyType="next"
+            onSubmitEditing={() => {
+              this.FirstTextInput.focus();
+            }}
+          />
+          <TextInput
+            ref={(input) => {
+              this.FirstTextInput = input;
+            }}
+            style={styles.input}
+            placeholder="Password"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry={true}
+            returnKeyType="go"
+            onSubmitEditing={handleSubmit}
+          />
+
+          {errorMessage && <Text style={styles.errorText}>{errorMessage}</Text>}
+
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleSubmit}
+            activeOpacity={0.8}
+          >
+            <ButtonSecondary>Sign In</ButtonSecondary>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.btnForgot}
+            activeOpacity={0.8}
+            onPress={() => navigation.navigate("ResetPasswordScreen")}
+          >
+            <Text style={styles.btnForgotText}>Forgot Password?</Text>
+          </TouchableOpacity>
+
+          <View style={styles.signUpView}>
+            <Text style={styles.signUpText}>Need to create an account?</Text>
+            <TouchableOpacity
+              style={styles.btnSignUp}
+              onPress={() => navigation.navigate("SignUp")}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.btnSignUpText}>Go to Sign Up</Text>
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
+      </View>
+    </TouchableWithoutFeedback>
   );
 };
 
@@ -101,6 +219,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: colors.background,
   },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: colors.background,
+    marginTop: 60,
+    padding: 20,
+  },
   logo: {
     width: 100,
     height: 100,
@@ -109,10 +235,11 @@ const styles = StyleSheet.create({
     fontFamily: "MontserratRegular",
     width: "80%",
     height: 40,
-    borderColor: "gray",
+    borderColor: colors.gray,
     borderWidth: 1,
     marginBottom: 10,
     padding: 10,
+    backgroundColor: colors.white,
   },
   button: {
     backgroundColor: colors.complementary,
@@ -125,12 +252,46 @@ const styles = StyleSheet.create({
   secondButton: {
     padding: 10,
     borderRadius: 5,
-    width: "40%",
+    width: "80%",
     alignItems: "center",
     marginTop: 15,
   },
   heading: {
     marginBottom: 50,
+  },
+  btnForgot: {
+    marginTop: 25,
+  },
+  btnForgotText: {
+    fontFamily: "MontserratRegular",
+    fontSize: 16,
+    color: colors.complementary,
+  },
+  signUpView: {
+    width: "80%",
+    alignItems: "center",
+    marginTop: 30,
+  },
+  signUpText: {
+    fontFamily: "MontserratRegular",
+    fontSize: 16,
+    color: colors.darkBlue,
+  },
+  btnSignUp: {
+    padding: 5,
+    // margin: Platform.OS === "android" ? 20 : 15,
+  },
+  btnSignUpText: {
+    fontFamily: "MontserratRegular",
+    fontSize: 16,
+    color: colors.complementary,
+  },
+  errorText: {
+    fontFamily: "MontserratRegular",
+    fontSize: 16,
+    color: colors.danger,
+    marginVertical: 10,
+    marginBottom: 20,
   },
 });
 
