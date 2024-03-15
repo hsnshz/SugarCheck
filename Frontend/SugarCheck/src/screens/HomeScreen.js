@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import {
   Text,
   StyleSheet,
@@ -13,14 +13,21 @@ import { useSelector } from "react-redux";
 import CardComponent from "../components/CardComponent";
 import { Ionicons } from "@expo/vector-icons";
 import colors from "../../config/colors";
+import axios from "axios";
+import { getNgrokUrl } from "../../config/constants";
+import SecondaryCardComponent from "../components/SecondaryCardComponent";
 
 const Home = ({ navigation }) => {
   // useLayoutEffect(() => {
   //   setHeaderOptions(navigation);
   // }, [navigation]);
 
-  const user = useSelector((state) => state.user) || {};
+  const user = useSelector((state) => state.user.user) || {};
+  const mealLogs = useSelector((state) => state.meal.mealLogs) || [];
+
   const animatedValue = useRef(new Animated.Value(0)).current;
+
+  const [profilePicture, setProfilePicture] = useState("");
 
   const isProfileComplete = (user) => {
     return (
@@ -55,13 +62,51 @@ const Home = ({ navigation }) => {
     return glucoseReadingsToday.length >= 3;
   };
 
+  const hasLoggedMealToday = (mealLogs) => {
+    if (mealLogs?.length === 0) {
+      return false;
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const mealsToday = mealLogs.filter((meal) => {
+      const [dayName, date] = meal.date.split(", ");
+      const [day, month, year] = date.split("/");
+      const mealDate = new Date(`${year}-${month}-${day}`);
+      return mealDate >= today;
+    });
+
+    return mealsToday.length > 0;
+  };
+
   useEffect(() => {
     hasLoggedThreeGlucoseValuesToday(user);
+    hasLoggedMealToday(mealLogs);
 
     return () => {
       animatedValue.removeAllListeners();
     };
   }, []);
+
+  useEffect(() => {
+    if (user.profilePicture) {
+      axios
+        .get(`${getNgrokUrl()}/${user.profilePicture}`, {
+          responseType: "blob",
+        })
+        .then((response) => {
+          const url = URL.createObjectURL(response.data);
+
+          setProfilePicture(url);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    } else {
+      setProfilePicture("");
+    }
+  }, [user.profilePicture]);
 
   const scrollY = useRef(new Animated.Value(0)).current;
 
@@ -83,7 +128,25 @@ const Home = ({ navigation }) => {
           source={require("../../assets/icons/AppIcon.png")}
           style={styles.logo}
         />
-        <View style={{ width: 35 }} />
+        <TouchableOpacity
+          style={styles.btnProfilePicture}
+          onPress={() => navigation.navigate("Profile")}
+        >
+          <View>
+            {profilePicture === "" ? (
+              <View style={styles.avatarPicture}>
+                <Text style={styles.avatarText}>
+                  {(user.firstName || "A")[0] + (user.lastName || "A")[0]}
+                </Text>
+              </View>
+            ) : (
+              <Image
+                source={{ uri: profilePicture }}
+                style={styles.profilePicture}
+              />
+            )}
+          </View>
+        </TouchableOpacity>
       </View>
 
       <Animated.ScrollView
@@ -110,23 +173,51 @@ const Home = ({ navigation }) => {
 
         <View style={styles.contentContainer}>
           {!isProfileComplete(user) ? (
-            <CardComponent
-              title="Get the full experience!"
-              text="It looks like your profile is incomplete. To get the most out of the
+            <View style={styles.profileCardContainer}>
+              <CardComponent
+                title="Get the full experience!"
+                text="It looks like your profile is incomplete. To get the most out of the
                 app, please complete your health profile."
-              btnText="Complete Profile"
-              navigateTo="HealthProfile"
-            />
+                btnText="Complete Profile"
+                navigateTo="HealthProfile"
+              />
+            </View>
           ) : null}
 
-          {!hasLoggedThreeGlucoseValuesToday(user) && (
+          {!hasLoggedThreeGlucoseValuesToday(user) &&
+          !hasLoggedMealToday(mealLogs) ? (
+            <View style={styles.mainCardContainer}>
+              <View style={styles.cardContainer}>
+                <SecondaryCardComponent
+                  title="Log your glucose!"
+                  text="You have not logged at least 3 glucose readings today. Tap here to log now."
+                  navigateTo="Glucose Monitor"
+                />
+              </View>
+
+              <View style={styles.cardContainer}>
+                <SecondaryCardComponent
+                  title="Log your meals!"
+                  text="Tap here to log a meal for today to keep track of your nutrition."
+                  navigateTo={"Log Meals"}
+                />
+              </View>
+            </View>
+          ) : !hasLoggedThreeGlucoseValuesToday(user) ? (
             <CardComponent
               title="Log your glucose!"
-              text="You have not logged at least 3 glucose values today. Please log more values for better tracking."
+              text="You have not logged at least 3 glucose readings today. Tap here to log now."
               btnText="Log Glucose"
               navigateTo="Glucose Monitor"
             />
-          )}
+          ) : !hasLoggedMealToday(mealLogs) ? (
+            <CardComponent
+              title="Log your meals!"
+              text="Tap here to log a meal for today to keep track of your nutrition."
+              btnText="Log Meals"
+              navigateTo={"Log Meals"}
+            />
+          ) : null}
         </View>
       </Animated.ScrollView>
     </SafeAreaView>
@@ -149,6 +240,30 @@ const styles = StyleSheet.create({
     width: 70,
     height: 70,
   },
+  profilePicture: {
+    width: 35,
+    height: 35,
+    borderRadius: 35 / 2,
+  },
+  btnProfilePicture: {
+    width: 35,
+    height: 35,
+    borderRadius: 35 / 2,
+    overflow: "hidden",
+  },
+  avatarPicture: {
+    width: 35,
+    height: 35,
+    borderRadius: 35 / 2,
+    backgroundColor: colors.disabled,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  avatarText: {
+    color: colors.white,
+    fontSize: 16,
+    fontFamily: "MontserratBold",
+  },
   scrollViewContent: {
     flexGrow: 1,
     paddingBottom: 100,
@@ -163,6 +278,9 @@ const styles = StyleSheet.create({
     fontFamily: "MontserratBold",
     color: colors.white,
   },
+  profileCardContainer: {
+    marginBottom: 20,
+  },
   contentContainer: {
     backgroundColor: colors.background,
     borderTopLeftRadius: 20,
@@ -170,6 +288,14 @@ const styles = StyleSheet.create({
     paddingTop: 15,
     paddingBottom: 30,
     minHeight: "100%",
+  },
+  mainCardContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingRight: 20,
+  },
+  cardContainer: {
+    width: "50%",
   },
 });
 

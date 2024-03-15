@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   StyleSheet,
   ScrollView,
@@ -10,25 +10,26 @@ import {
   ActivityIndicator,
   Image,
   Keyboard,
-  Button,
-  Alert,
 } from "react-native";
 import colors from "../../config/colors";
 import { getFoodDBAPIInfo } from "../../config/constants";
 import axios from "axios";
 import * as Haptics from "expo-haptics";
+import Toast from "react-native-fast-toast";
 import Icon from "react-native-vector-icons/FontAwesome5";
 import FoodItemCardComponent from "../components/FoodItemCardComponent";
 import Sheet from "../components/Sheet";
 import LogMealSheetContent from "../components/LogMealSheetContent";
 
-const LogMealsScreen = () => {
+const LogMealsScreen = ({ navigation }) => {
   const [query, setQuery] = useState("");
   const [foodItems, setFoodItems] = useState([]);
 
   const [isLoading, setIsLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isSheetVisible, setIsSheetVisible] = useState(false);
+
+  const toastRef = useRef(null);
 
   const searchFoodItem = async () => {
     if (!query.trim().match(/^[a-z0-9 ]+$/i)) {
@@ -68,6 +69,13 @@ const LogMealsScreen = () => {
     setIsSheetVisible(!isSheetVisible);
   };
 
+  const handleOnAdd = () => {
+    toastRef.current.show("Meal added successfully", {
+      type: "success",
+    });
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  };
+
   return (
     <View style={styles.container}>
       <ScrollView
@@ -93,8 +101,8 @@ const LogMealsScreen = () => {
           </TouchableOpacity>
         </View>
 
-        {foodItems != "" && query != "" ? (
-          <View style={styles.clearContainer}>
+        <View style={styles.clearContainer}>
+          {foodItems != "" ? (
             <TouchableOpacity
               style={styles.clearText}
               onPress={() => {
@@ -104,8 +112,17 @@ const LogMealsScreen = () => {
             >
               <Text style={styles.clearText}>Clear</Text>
             </TouchableOpacity>
-          </View>
-        ) : null}
+          ) : (
+            <View style={styles.clearText}></View>
+          )}
+
+          <TouchableOpacity
+            style={styles.loggedMeals}
+            onPress={() => navigation.navigate("LoggedMealsScreen")}
+          >
+            <Text style={styles.loggedMealsText}>View Logged Meals</Text>
+          </TouchableOpacity>
+        </View>
 
         {foodItems === "" && !query.trim().match(/^[a-z0-9 ]+$/i) ? (
           <Text style={styles.invalidSearchText}>
@@ -120,7 +137,11 @@ const LogMealsScreen = () => {
         ) : (
           <View>
             {foodItems?.map((item, index) => (
-              <FoodItemCardComponent key={index} item={item} />
+              <FoodItemCardComponent
+                key={index}
+                item={item}
+                onAdd={handleOnAdd}
+              />
             ))}
           </View>
         )}
@@ -131,10 +152,25 @@ const LogMealsScreen = () => {
             onRequestClose={toggleSheet}
             height="85%"
             backgroundColor={colors.active}
-            children={<LogMealSheetContent toggleSheet={toggleSheet} />}
+            children={
+              <LogMealSheetContent
+                toggleSheet={toggleSheet}
+                onAdd={handleOnAdd}
+              />
+            }
           />
         )}
       </ScrollView>
+
+      <Toast
+        ref={toastRef}
+        placement="top"
+        style={{ backgroundColor: colors.darkBlue }}
+        fadeInDuration={750}
+        fadeOutDuration={1000}
+        opacity={1}
+        textStyle={{ color: colors.white, fontFamily: "MontserratRegular" }}
+      />
     </View>
   );
 };
@@ -144,11 +180,18 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
+  loggedMeals: {},
+  loggedMealsText: {
+    fontFamily: "MontserratRegular",
+    fontSize: 16,
+    color: colors.darkBlue,
+  },
   clearContainer: {
     flexDirection: "row",
-    justifyContent: "flex-start",
+    justifyContent: "space-between",
     marginHorizontal: 20,
     marginTop: 10,
+    paddingHorizontal: 20,
   },
   clearText: {
     fontFamily: "MontserratRegular",

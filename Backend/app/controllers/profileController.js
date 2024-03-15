@@ -1,11 +1,15 @@
 import { User } from "../models/UserModel.js";
 import bcrypt from "bcrypt";
 import { sendPasswordResetEmail } from "../utils/emailService.js";
+import fs from "fs";
+import path, { dirname } from "path";
+import { fileURLToPath } from "url";
 
 const generateVerificationCode = () => {
   const code = Math.floor(100000 + Math.random() * 900000);
   return code.toString();
 };
+
 export async function updateProfile(req, res) {
   try {
     const { username, email, phoneNumber } = req.body;
@@ -28,6 +32,14 @@ export async function updateProfile(req, res) {
     // If a file was uploaded, update the user's profile picture
     if (req.file) {
       console.log("req.file:", req.file);
+
+      // Delete the previous profile picture if it exists
+      if (user.profilePicture) {
+        const __filename = fileURLToPath(import.meta.url);
+        const __dirname = dirname(__filename);
+        fs.unlinkSync(path.join(__dirname, "../", user.profilePicture));
+      }
+
       user.profilePicture = req.file.path;
     }
 
@@ -51,6 +63,12 @@ export async function deleteProfilePicture(req, res) {
 
     if (!user) {
       return res.status(404).send({ error: "User not found" });
+    }
+
+    if (user.profilePicture) {
+      const __filename = fileURLToPath(import.meta.url);
+      const __dirname = dirname(__filename);
+      fs.unlinkSync(path.join(__dirname, "../", user.profilePicture));
     }
 
     user.profilePicture = "";

@@ -24,7 +24,8 @@ import { CommonActions } from "@react-navigation/native";
 import { getNgrokUrl } from "../../config/constants";
 import axios from "axios";
 import { useDispatch } from "react-redux";
-import { setToken, setUser } from "../store/store";
+import { setToken } from "../store/slices/authSlice";
+import { setUser } from "../store/slices/userSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Icon from "react-native-vector-icons/AntDesign";
 import * as Haptics from "expo-haptics";
@@ -188,20 +189,23 @@ const SignInScreen = ({ navigation }) => {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.btnSignUp}
-            onPress={() => navigation.navigate("SignUp")}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.btnSignUpText}>Go to Sign Up</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
             style={styles.btnForgot}
             activeOpacity={0.8}
             onPress={() => navigation.navigate("ResetPasswordScreen")}
           >
             <Text style={styles.btnForgotText}>Forgot Password?</Text>
           </TouchableOpacity>
+
+          <View style={styles.signUpView}>
+            <Text style={styles.signUpText}>Need to create an account?</Text>
+            <TouchableOpacity
+              style={styles.btnSignUp}
+              onPress={() => navigation.navigate("SignUp")}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.btnSignUpText}>Go to Sign Up</Text>
+            </TouchableOpacity>
+          </View>
         </KeyboardAvoidingView>
       </View>
     </TouchableWithoutFeedback>
@@ -256,26 +260,30 @@ const styles = StyleSheet.create({
     marginBottom: 50,
   },
   btnForgot: {
-    marginTop: 20,
+    marginTop: 25,
   },
   btnForgotText: {
     fontFamily: "MontserratRegular",
     fontSize: 16,
     color: colors.complementary,
   },
+  signUpView: {
+    width: "80%",
+    alignItems: "center",
+    marginTop: 30,
+  },
+  signUpText: {
+    fontFamily: "MontserratRegular",
+    fontSize: 16,
+    color: colors.darkBlue,
+  },
   btnSignUp: {
-    marginTop: 0,
-    padding: 10,
-    width: "40%",
-    borderColor: colors.complementary,
-    borderWidth: 1,
-    borderRadius: 5,
-    margin: Platform.OS === "android" ? 20 : 15,
+    padding: 5,
+    // margin: Platform.OS === "android" ? 20 : 15,
   },
   btnSignUpText: {
     fontFamily: "MontserratRegular",
     fontSize: 16,
-    textAlign: "center",
     color: colors.complementary,
   },
   errorText: {

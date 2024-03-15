@@ -12,14 +12,14 @@ import {
 } from "react-native";
 import axios from "axios";
 import { getNgrokUrl } from "../../config/constants";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import RecipeCardComponent from "../components/RecipeCardComponent";
 import { Ionicons } from "@expo/vector-icons";
 import colors from "../../config/colors";
 
 const FavoriteRecipesScreen = ({ navigation }) => {
-  const user = useSelector((state) => state.user) || {};
-  const token = useSelector((state) => state.token) || {};
+  const user = useSelector((state) => state.user.user) || {};
+  const token = useSelector((state) => state.auth.token) || {};
 
   const [recipes, setRecipes] = useState([]);
 

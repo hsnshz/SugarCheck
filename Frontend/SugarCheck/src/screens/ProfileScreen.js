@@ -6,7 +6,8 @@ import colors from "../../config/colors";
 import { useDispatch } from "react-redux";
 import { Alert } from "react-native";
 import { CommonActions } from "@react-navigation/native";
-import { persistor, signOut } from "../store/store";
+import { persistor } from "../store/store";
+import { signOut } from "../store/slices/authSlice";
 import * as SecureStore from "expo-secure-store";
 import { useNavigation } from "@react-navigation/native";
 import { ScrollView } from "react-native";
@@ -28,7 +29,7 @@ const SettingsItem = ({ title, iconName, textStyle, onPress }) => (
 const ProfileScreen = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
-  const user = useSelector((state) => state.user) || {};
+  const user = useSelector((state) => state.user.user) || {};
 
   const [profilePicture, setProfilePicture] = useState(null);
   const [isImageLoaded, setIsImageLoaded] = useState(false);

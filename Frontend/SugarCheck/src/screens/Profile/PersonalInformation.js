@@ -17,18 +17,17 @@ import { ScrollView } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
 import { getNgrokUrl } from "../../../config/constants";
-import { updateUser } from "../../store/store";
+import { updateUser } from "../../store/slices/userSlice";
 import Toast from "react-native-fast-toast";
 import * as Haptics from "expo-haptics";
 import Icon from "react-native-vector-icons/AntDesign";
 import * as ImagePicker from "expo-image-picker";
 import { useActionSheet } from "@expo/react-native-action-sheet";
-import { Avatar } from "react-native-elements";
 
 const PersonalInformation = ({ navigation }) => {
   const dispatch = useDispatch();
-  const user = useSelector((state) => state.user) || {};
-  const token = useSelector((state) => state.token) || "";
+  const user = useSelector((state) => state.user.user) || {};
+  const token = useSelector((state) => state.auth.token) || "";
 
   const [profilePicture, setProfilePicture] = useState(
     user ? user.profilePicture : ""

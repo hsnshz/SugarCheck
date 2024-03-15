@@ -18,8 +18,8 @@ import Toast from "react-native-fast-toast";
 
 const ChangePassword = ({ navigation }) => {
   const dispatch = useDispatch();
-  const user = useSelector((state) => state.user) || {};
-  const token = useSelector((state) => state.token) || "";
+  const user = useSelector((state) => state.user.user) || {};
+  const token = useSelector((state) => state.auth.token) || "";
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");

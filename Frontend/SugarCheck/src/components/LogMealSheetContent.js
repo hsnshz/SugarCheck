@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   View,
   Text,
@@ -16,11 +16,12 @@ import colors from "../../config/colors";
 import axios from "axios";
 import { getNgrokUrl } from "../../config/constants";
 import { useDispatch, useSelector } from "react-redux";
+import { addMealLog } from "../store/slices/mealSlice";
 import * as Haptics from "expo-haptics";
 
-const LogMealSheetContent = ({ toggleSheet }) => {
-  const user = useSelector((state) => state.user) || {};
-  const token = useSelector((state) => state.token) || "";
+const LogMealSheetContent = ({ toggleSheet, onAdd }) => {
+  const user = useSelector((state) => state.user.user) || {};
+  const token = useSelector((state) => state.auth.token) || "";
   const dispatch = useDispatch();
 
   const [showTimePicker, setShowTimePicker] = useState(false);
@@ -31,7 +32,16 @@ const LogMealSheetContent = ({ toggleSheet }) => {
   const [carbohydrates, setCarbohydrates] = useState("");
   const [fats, setFats] = useState("");
   const [proteins, setProteins] = useState("");
+  const [fiber, setFiber] = useState("");
   const [notes, setNotes] = useState("");
+  const [image, setImage] = useState("https://i.imgur.com/NxIC7gE.png");
+
+  const caloriesRef = useRef();
+  const carbohydratesRef = useRef();
+  const fatsRef = useRef();
+  const proteinsRef = useRef();
+  const fiberRef = useRef();
+  const notesRef = useRef();
 
   const handleShowTimePicker = () => {
     Keyboard.dismiss();
@@ -44,7 +54,8 @@ const LogMealSheetContent = ({ toggleSheet }) => {
       calories === "" ||
       carbohydrates === "" ||
       fats === "" ||
-      proteins === ""
+      proteins === "" ||
+      fiber === ""
     ) {
       Alert.alert("Incomplete Form", "Please fill all the fields");
       return;
@@ -60,7 +71,9 @@ const LogMealSheetContent = ({ toggleSheet }) => {
         carbohydrates: carbohydrates,
         fats: fats,
         proteins: proteins,
+        fiber: fiber,
         notes: notes,
+        image: image,
       };
 
       const response = await axios.post(
@@ -75,16 +88,19 @@ const LogMealSheetContent = ({ toggleSheet }) => {
       );
 
       if (response.status === 200) {
-        Alert.alert("Success", "Meal logged successfully");
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        const mealLog = response.data.mealLog.meals[0];
+        dispatch(addMealLog(mealLog));
 
         setMealName("");
         setCalories("");
         setCarbohydrates("");
         setFats("");
         setProteins("");
+        setFiber("");
         setNotes("");
         setTimestamp(new Date());
+
+        onAdd();
         toggleSheet();
       }
     } catch (error) {
@@ -105,7 +121,7 @@ const LogMealSheetContent = ({ toggleSheet }) => {
             style={styles.input}
             returnKeyType="next"
             onSubmitEditing={() => {
-              this.secondTextInput.focus();
+              caloriesRef.current.focus();
             }}
           />
         </View>
@@ -113,15 +129,13 @@ const LogMealSheetContent = ({ toggleSheet }) => {
         <View style={styles.subContainer}>
           <Text style={styles.label}>Calories</Text>
           <TextInput
-            ref={(input) => {
-              this.secondTextInput = input;
-            }}
+            ref={caloriesRef}
             value={calories}
             onChangeText={setCalories}
             style={styles.input}
             returnKeyType="next"
             onSubmitEditing={() => {
-              this.thirdTextInput.focus();
+              carbohydratesRef.current.focus();
             }}
             keyboardType="numeric"
           />
@@ -130,15 +144,13 @@ const LogMealSheetContent = ({ toggleSheet }) => {
         <View style={styles.subContainer}>
           <Text style={styles.label}>Carbohydrates</Text>
           <TextInput
-            ref={(input) => {
-              this.thirdTextInput = input;
-            }}
+            ref={carbohydratesRef}
             value={carbohydrates}
             onChangeText={setCarbohydrates}
             style={styles.input}
             returnKeyType="next"
             onSubmitEditing={() => {
-              this.fourthTextInput.focus();
+              fatsRef.current.focus();
             }}
             keyboardType="numeric"
           />
@@ -147,15 +159,13 @@ const LogMealSheetContent = ({ toggleSheet }) => {
         <View style={styles.subContainer}>
           <Text style={styles.label}>Fats</Text>
           <TextInput
-            ref={(input) => {
-              this.fourthTextInput = input;
-            }}
+            ref={fatsRef}
             value={fats}
             onChangeText={setFats}
             style={styles.input}
             returnKeyType="next"
             onSubmitEditing={() => {
-              this.fifthTextInput.focus();
+              proteinsRef.current.focus();
             }}
             keyboardType="numeric"
           />
@@ -164,15 +174,28 @@ const LogMealSheetContent = ({ toggleSheet }) => {
         <View style={styles.subContainer}>
           <Text style={styles.label}>Proteins</Text>
           <TextInput
-            ref={(input) => {
-              this.fifthTextInput = input;
-            }}
+            ref={proteinsRef}
             value={proteins}
             onChangeText={setProteins}
             style={styles.input}
             returnKeyType="next"
             onSubmitEditing={() => {
-              this.sixthTextInput.focus();
+              fiberRef.current.focus();
+            }}
+            keyboardType="numeric"
+          />
+        </View>
+
+        <View style={styles.subContainer}>
+          <Text style={styles.label}>Fiber</Text>
+          <TextInput
+            ref={fiberRef}
+            value={fiber}
+            onChangeText={setFiber}
+            style={styles.input}
+            returnKeyType="next"
+            onSubmitEditing={() => {
+              notesRef.current.focus();
             }}
             keyboardType="numeric"
           />
@@ -181,9 +204,7 @@ const LogMealSheetContent = ({ toggleSheet }) => {
         <View style={styles.subContainer}>
           <Text style={styles.label}>Notes</Text>
           <TextInput
-            ref={(input) => {
-              this.sixthTextInput = input;
-            }}
+            ref={notesRef}
             value={notes}
             onChangeText={setNotes}
             style={[styles.input, { height: 80 }]}

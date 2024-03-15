@@ -12,7 +12,8 @@ import colors from "../../../config/colors";
 import axios from "axios";
 import { getNgrokUrl } from "../../../config/constants";
 import { useSelector, useDispatch } from "react-redux";
-import { signOut, persistor } from "../../store/store";
+import { persistor } from "../../store/store";
+import { signOut } from "../../store/slices/authSlice";
 import { CommonActions } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
@@ -20,8 +21,8 @@ import Icon from "react-native-vector-icons/AntDesign";
 
 const DeleteAccount = ({ navigation }) => {
   const dispatch = useDispatch();
-  const user = useSelector((state) => state.user);
-  const token = useSelector((state) => state.token);
+  const user = useSelector((state) => state.user.user) || {};
+  const token = useSelector((state) => state.auth.token) || "";
 
   const handleDeleteAccount = async () => {
     try {

@@ -13,10 +13,11 @@ import Icon from "react-native-vector-icons/AntDesign";
 import axios from "axios";
 import { getNgrokUrl } from "../../config/constants";
 import { useSelector, useDispatch } from "react-redux";
+import { addMealFavorite, deleteMealFavorite } from "../store/slices/mealSlice";
 
 const RecipeInfo = ({ route, navigation }) => {
-  const user = useSelector((state) => state.user);
-  const token = useSelector((state) => state.token);
+  const user = useSelector((state) => state.user.user) || {};
+  const token = useSelector((state) => state.auth.token) || "";
   const dispatch = useDispatch();
 
   const { hit } = route.params;
@@ -39,8 +40,11 @@ const RecipeInfo = ({ route, navigation }) => {
           data: { url: recipeUrl },
           headers: headers,
         });
+
+        dispatch(deleteMealFavorite(recipeUrl));
       } else {
         await axios.post(createUrl, { url: recipeUrl }, { headers: headers });
+        dispatch(addMealFavorite(recipeUrl));
       }
 
       setIsFavorite(!isFavorite);

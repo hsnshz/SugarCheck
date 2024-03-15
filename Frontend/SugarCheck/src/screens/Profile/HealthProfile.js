@@ -14,15 +14,15 @@ import { ScrollView } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
 import { getNgrokUrl } from "../../../config/constants";
-import { updateHealthProfile } from "../../store/store";
+import { updateHealthProfile } from "../../store/slices/userSlice";
 import Toast from "react-native-fast-toast";
 import * as Haptics from "expo-haptics";
 import Icon from "react-native-vector-icons/AntDesign";
 
 const HealthProfile = ({ navigation }) => {
   const dispatch = useDispatch();
-  const user = useSelector((state) => state.user);
-  const token = useSelector((state) => state.token);
+  const user = useSelector((state) => state.user.user) || {};
+  const token = useSelector((state) => state.auth.token) || "";
 
   const [height, setHeight] = useState(user ? user.healthProfile.height : 0);
   const [weight, setWeight] = useState(user ? user.healthProfile.weight : 0);

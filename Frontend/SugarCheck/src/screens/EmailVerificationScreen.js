@@ -12,7 +12,6 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native";
-import { Heading } from "../../config/styledText";
 import axios from "axios";
 import { getNgrokUrl } from "../../config/constants";
 import { CommonActions } from "@react-navigation/native";
@@ -21,7 +20,7 @@ import colors from "../../config/colors";
 import Icon from "react-native-vector-icons/AntDesign";
 
 const EmailVerificationScreen = ({ navigation }) => {
-  const user = useSelector((state) => state.user);
+  const user = useSelector((state) => state.user.user) || {};
   const email = user ? user.email : "";
   const [code, setCode] = useState(Array(6).fill(""));
 

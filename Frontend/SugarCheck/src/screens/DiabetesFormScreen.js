@@ -19,7 +19,7 @@ import axios from "axios";
 import { getConstants, getNgrokUrl } from "../../config/constants";
 import { setHeaderOptions } from "../components/HeaderOptions";
 import { useSelector } from "react-redux";
-import { updateHealthProfile } from "../store/store";
+import { updateHealthProfile } from "../store/slices/userSlice";
 import { useDispatch } from "react-redux";
 
 const { width: viewportWidth } = Dimensions.get("window");
@@ -30,8 +30,8 @@ const DiabetesForm = ({ navigation }) => {
   }, [navigation]);
 
   const dispatch = useDispatch();
-  const user = useSelector((state) => state.user);
-  const token = useSelector((state) => state.token);
+  const user = useSelector((state) => state.user.user) || {};
+  const token = useSelector((state) => state.auth.token) || "";
 
   const [formData, setFormData] = useState({
     age: "",

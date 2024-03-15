@@ -17,7 +17,8 @@ import { getNgrokUrl } from "../../../config/constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
 import { useDispatch } from "react-redux";
-import { persistor, signOut } from "../../store/store";
+import { persistor } from "../../store/store";
+import { signOut } from "../../store/slices/authSlice";
 import { CommonActions } from "@react-navigation/native";
 import * as Haptics from "expo-haptics";
 
