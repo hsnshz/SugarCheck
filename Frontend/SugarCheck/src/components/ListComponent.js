@@ -18,7 +18,7 @@ import colors from "../../config/colors";
 import Icon from "react-native-vector-icons/AntDesign";
 import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
-import { updateGlucoseValueSlice } from "../store/store.js";
+import { updateGlucoseValueSlice } from "../store/slices/userSlice";
 import { getNgrokUrl } from "../../config/constants";
 import Dialog from "react-native-dialog";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -42,8 +42,8 @@ const ListComponent = ({
   onRemove = () => {},
   onUpdate = () => {},
 }) => {
-  const user = useSelector((state) => state.user);
-  const token = useSelector((state) => state.token);
+  const user = useSelector((state) => state.user.user) || {};
+  const token = useSelector((state) => state.auth.token) || "";
   const dispatch = useDispatch();
 
   const swipeableRefs = useRef([]);

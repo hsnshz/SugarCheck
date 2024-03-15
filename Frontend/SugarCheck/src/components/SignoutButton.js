@@ -6,7 +6,8 @@ import { useNavigation } from "@react-navigation/native";
 import { Alert } from "react-native";
 import { CommonActions } from "@react-navigation/native";
 import * as SecureStore from "expo-secure-store";
-import { signOut, persistor } from "../store/store";
+import { persistor } from "../store/store";
+import { signOut } from "../store/slices/authSlice";
 import colors from "../../config/colors";
 
 const SignOutButton = () => {

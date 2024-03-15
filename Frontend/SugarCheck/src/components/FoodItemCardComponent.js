@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -17,11 +17,12 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import axios from "axios";
 import { getNgrokUrl } from "../../config/constants";
 import { useSelector, useDispatch } from "react-redux";
+import { addMealLog } from "../store/slices/mealSlice";
 import * as Haptics from "expo-haptics";
 
-const FoodItemCardComponent = ({ item }) => {
-  const user = useSelector((state) => state.user) || {};
-  const token = useSelector((state) => state.token) || {};
+const FoodItemCardComponent = ({ item, onAdd }) => {
+  const user = useSelector((state) => state.user.user) || {};
+  const token = useSelector((state) => state.auth.token) || {};
   const dispatch = useDispatch();
 
   const [isCollapsed, setIsCollapsed] = useState(true);
@@ -32,7 +33,7 @@ const FoodItemCardComponent = ({ item }) => {
   const [notes, setNotes] = useState("");
   const [selectedTime, setSelectedTime] = useState(new Date());
 
-  const image = item.food.image;
+  const image = item.food.image || "https://i.imgur.com/NxIC7gE.png";
   const title = item.food.label;
   const text = `Category: ${item.food.category}\nCategory Label: ${item.food.categoryLabel}\n`;
   const btnText = "Log Meal";
@@ -62,7 +63,9 @@ const FoodItemCardComponent = ({ item }) => {
         carbohydrates: Math.round(item.food.nutrients.CHOCDF),
         fats: Math.round(item.food.nutrients.FAT),
         proteins: Math.round(item.food.nutrients.PROCNT),
+        fiber: Math.round(item.food.nutrients.FIBTG),
         notes: notes,
+        image: image,
       };
 
       const response = await axios.post(
@@ -77,8 +80,9 @@ const FoodItemCardComponent = ({ item }) => {
       );
 
       if (response.status === 200) {
-        Alert.alert("Success", "Meal logged successfully");
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        const mealLog = response.data.mealLog.meals[0];
+        dispatch(addMealLog(mealLog));
+        onAdd();
       }
     } catch (error) {
       console.log(error);
@@ -206,6 +210,7 @@ const styles = StyleSheet.create({
   },
   contentSubContainer: {
     width: "90%",
+    paddingLeft: 30,
   },
   buttonSubContainer: {
     width: "10%",

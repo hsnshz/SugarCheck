@@ -32,6 +32,7 @@ import SignOutButton from "../components/SignoutButton";
 import ResetPassword from "../screens/Profile/ResetPassword";
 import DeleteAccount from "../screens/Profile/DeleteAccount";
 import ChangePassword from "../screens/Profile/ChangePassword";
+import LoggedMealsScreen from "../screens/LoggedMealsScreen";
 
 const Stack = createStackNavigator();
 
