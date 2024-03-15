@@ -54,7 +54,7 @@ def predict():
         input_df["age"] = minmax.transform(input_df[["age"]])
 
     prediction = diabetes_model.predict(input_df)
-    print("Prediction", prediction)
+    print("\nPrediction", prediction)
     return jsonify(prediction.tolist())
 
 

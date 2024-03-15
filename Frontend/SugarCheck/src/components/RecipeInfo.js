@@ -7,6 +7,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Dimensions,
+  SafeAreaView,
 } from "react-native";
 import colors from "../../config/colors";
 import Icon from "react-native-vector-icons/AntDesign";
@@ -79,121 +80,129 @@ const RecipeInfo = ({ route, navigation }) => {
   }, [isFavorite]);
 
   return (
-    <ScrollView>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="left" size={25} color={colors.darkBlue} />
-        </TouchableOpacity>
-
-        {isFavorite ? (
-          <TouchableOpacity
-            style={styles.btnFavorited}
-            onPress={handleFavorite}
-          >
-            <Text style={styles.btnFavoritedText}>Favorited</Text>
-            <Icon name="heart" size={18} color={colors.white} />
+    <SafeAreaView>
+      <ScrollView>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Icon name="left" size={25} color={colors.darkBlue} />
           </TouchableOpacity>
-        ) : (
-          <TouchableOpacity style={styles.btnFavorite} onPress={handleFavorite}>
-            <Text style={styles.btnFavoriteText}>Favorite</Text>
-            <Icon name="hearto" size={18} color={colors.darkBlue} />
-          </TouchableOpacity>
-        )}
-      </View>
 
-      <View style={styles.container}>
-        <Image source={{ uri: hit.recipe.image }} style={styles.image} />
-        <Text style={styles.headingText}>{hit.recipe.label}</Text>
+          {isFavorite ? (
+            <TouchableOpacity
+              style={styles.btnFavorited}
+              onPress={handleFavorite}
+            >
+              <Text style={styles.btnFavoritedText}>Favorited</Text>
+              <Icon name="heart" size={18} color={colors.white} />
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              style={styles.btnFavorite}
+              onPress={handleFavorite}
+            >
+              <Text style={styles.btnFavoriteText}>Favorite</Text>
+              <Icon name="hearto" size={18} color={colors.darkBlue} />
+            </TouchableOpacity>
+          )}
+        </View>
 
-        {hit.recipe.cuisineType != "" && (
-          <View>
-            <Text style={styles.labelText}>Cuisine Type</Text>
-            <Text style={styles.infoText}>{hit.recipe.cuisineType}</Text>
-          </View>
-        )}
+        <View style={styles.container}>
+          <Image source={{ uri: hit.recipe.image }} style={styles.image} />
+          <Text style={styles.headingText}>{hit.recipe.label}</Text>
 
-        {hit.recipe.mealType != "" && (
-          <View>
-            <Text style={styles.labelText}>Meal Type</Text>
-            <Text style={styles.infoText}>{hit.recipe.mealType}</Text>
-          </View>
-        )}
+          {hit.recipe.cuisineType != "" && (
+            <View>
+              <Text style={styles.labelText}>Cuisine Type</Text>
+              <Text style={styles.infoText}>{hit.recipe.cuisineType}</Text>
+            </View>
+          )}
 
-        {hit.recipe.calories > 0 && (
-          <View>
-            <Text style={styles.labelText}>Calories</Text>
-            <Text style={styles.infoText}>
-              {Math.floor(hit.recipe.calories)} kcal
-            </Text>
-          </View>
-        )}
+          {hit.recipe.mealType != "" && (
+            <View>
+              <Text style={styles.labelText}>Meal Type</Text>
+              <Text style={styles.infoText}>{hit.recipe.mealType}</Text>
+            </View>
+          )}
 
-        {hit.recipe.dietLabels != "" && (
-          <View>
-            <Text style={styles.labelText}>Diet Labels</Text>
-            {hit.recipe.dietLabels.map((label, index) => (
-              <Text key={index} style={styles.infoText}>
-                {label}
+          {hit.recipe.calories > 0 && (
+            <View>
+              <Text style={styles.labelText}>Calories</Text>
+              <Text style={styles.infoText}>
+                {Math.floor(hit.recipe.calories)} kcal
               </Text>
-            ))}
-          </View>
-        )}
+            </View>
+          )}
 
-        {hit.recipe.healthLabels != "" && (
-          <View>
-            <Text style={styles.labelText}>Health Labels</Text>
-            {hit.recipe.healthLabels.map((label, index) => (
-              <Text key={index} style={styles.infoText}>
-                {label}
-              </Text>
-            ))}
-          </View>
-        )}
+          {hit.recipe.dietLabels != "" && (
+            <View>
+              <Text style={styles.labelText}>Diet Labels</Text>
+              {hit.recipe.dietLabels.map((label, index) => (
+                <Text key={index} style={styles.infoText}>
+                  {label}
+                </Text>
+              ))}
+            </View>
+          )}
 
-        {hit.recipe.ingredientLines != "" && (
-          <View>
-            <Text style={styles.labelText}>Ingredients</Text>
-            {hit.recipe.ingredientLines.map((ingredient, index) => (
-              <Text key={index} style={styles.infoText}>
-                {ingredient}
-              </Text>
-            ))}
-          </View>
-        )}
+          {hit.recipe.healthLabels != "" && (
+            <View>
+              <Text style={styles.labelText}>Health Labels</Text>
+              {hit.recipe.healthLabels.map((label, index) => (
+                <Text key={index} style={styles.infoText}>
+                  {label}
+                </Text>
+              ))}
+            </View>
+          )}
 
-        {hit.recipe.ingredients != "" && (
-          <View>
-            <Text style={styles.labelText}>Ingredients Information</Text>
-            {hit.recipe.ingredients.map((ingredient, index) => (
-              <View key={index} style={styles.ingredientInfo}>
-                {ingredient.image && (
-                  <Image
-                    source={{ uri: ingredient.image }}
-                    style={{
-                      width: 100,
-                      height: 100,
-                      borderRadius: 10,
-                      marginRight: 10,
-                    }}
-                  />
-                )}
-                <View style={styles.innerIngredientContainer}>
-                  <Text
-                    style={[styles.infoText, { fontFamily: "MontserratBold" }]}
-                  >
-                    Category:
-                    {ingredient.foodCategory && ` ${ingredient.foodCategory}`}
-                  </Text>
-                  <Text style={styles.infoText}>
-                    {ingredient.text}: {Math.floor(ingredient.weight)} g
-                  </Text>
+          {hit.recipe.ingredientLines != "" && (
+            <View>
+              <Text style={styles.labelText}>Ingredients</Text>
+              {hit.recipe.ingredientLines.map((ingredient, index) => (
+                <Text key={index} style={styles.infoText}>
+                  {ingredient}
+                </Text>
+              ))}
+            </View>
+          )}
+
+          {hit.recipe.ingredients != "" && (
+            <View>
+              <Text style={styles.labelText}>Ingredients Information</Text>
+              {hit.recipe.ingredients.map((ingredient, index) => (
+                <View key={index} style={styles.ingredientInfo}>
+                  {ingredient.image && (
+                    <Image
+                      source={{ uri: ingredient.image }}
+                      style={{
+                        width: 100,
+                        height: 100,
+                        borderRadius: 10,
+                        marginRight: 10,
+                      }}
+                    />
+                  )}
+                  <View style={styles.innerIngredientContainer}>
+                    <Text
+                      style={[
+                        styles.infoText,
+                        { fontFamily: "MontserratBold" },
+                      ]}
+                    >
+                      Category:
+                      {ingredient.foodCategory && ` ${ingredient.foodCategory}`}
+                    </Text>
+                    <Text style={styles.infoText}>
+                      {ingredient.text}: {Math.floor(ingredient.weight)} g
+                    </Text>
+                  </View>
                 </View>
-              </View>
-            ))}
-          </View>
-        )}
-      </View>
-    </ScrollView>
+              ))}
+            </View>
+          )}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 

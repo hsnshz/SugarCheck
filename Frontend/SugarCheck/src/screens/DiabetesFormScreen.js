@@ -214,6 +214,7 @@ const DiabetesForm = ({ navigation }) => {
       })
       .then((response) => {
         if (response.status === 200) {
+          console.log(response.data);
           // Update the user data in the Redux store
           dispatch(
             updateHealthProfile({

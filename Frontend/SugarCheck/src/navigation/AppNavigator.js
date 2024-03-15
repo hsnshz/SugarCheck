@@ -231,22 +231,7 @@ export function RecipeStackNavigator() {
         name="RecipeInfo"
         component={RecipeInfo}
         options={{
-          headerTitle: "Recipe Information",
-          headerStyle: {
-            height: 130,
-            backgroundColor: colors.background,
-            borderBottomWidth: 0,
-            shadowOpacity: 0,
-          },
-          headerBackImage: () => (
-            <Ionicons
-              name="ios-arrow-back"
-              size={35}
-              color={colors.primary}
-              style={{ marginLeft: 20 }}
-            />
-          ),
-          headerBackTitleVisible: false,
+          headerShown: false,
         }}
       />
     </RecipeStack.Navigator>

@@ -71,10 +71,13 @@ const Home = ({ navigation }) => {
     today.setHours(0, 0, 0, 0);
 
     const mealsToday = mealLogs.filter((meal) => {
-      const [dayName, date] = meal.date.split(", ");
-      const [day, month, year] = date.split("/");
-      const mealDate = new Date(`${year}-${month}-${day}`);
-      return mealDate >= today;
+      if (meal && meal.date) {
+        const [dayName, date] = meal.date.split(", ");
+        const [day, month, year] = date.split("/");
+        const mealDate = new Date(`${year}-${month}-${day}`);
+        return mealDate >= today;
+      }
+      return false;
     });
 
     return mealsToday.length > 0;
