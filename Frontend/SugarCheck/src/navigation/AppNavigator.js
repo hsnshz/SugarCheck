@@ -18,6 +18,7 @@ import colors from "../../config/colors";
 import ProfileScreen from "../screens/ProfileScreen";
 import { Heading } from "../../config/styledText";
 import { Ionicons } from "@expo/vector-icons";
+import MaterialIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import Icon from "react-native-vector-icons/AntDesign";
 import GlucoseMonitorScreen from "../screens/GlucoseMonitorScreen";
 import PersonalInformation from "../screens/Profile/PersonalInformation";
@@ -252,11 +253,10 @@ export function DrawerNavigator() {
         name="DiabetesForm"
         component={DiabetesFormScreen}
         options={{
-          headerLeft: null,
+          headerShown: false,
           drawerLabel: "Diabetes Prediction",
-          headerTitle: "Diabetes Prediction",
           drawerIcon: ({ color, size }) => (
-            <Ionicons name="ios-list" color={color} size={size} />
+            <MaterialIcon name="diabetes" color={color} size={size} />
           ),
         }}
       />
