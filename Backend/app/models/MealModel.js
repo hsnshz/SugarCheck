@@ -21,7 +21,7 @@ const mealFavoritesSchema = new Schema(
     userId: { type: Schema.Types.ObjectId, ref: "User" },
     recipeURL: { type: String, default: "" },
   },
-  { collection: "MealFavorites" }
+  { collection: "MealFavorites", timestamps: true }
 );
 
 // Meal Logging Schema
@@ -43,7 +43,7 @@ const mealLoggingSchema = new Schema(
     date: { type: Date, default: Date.now },
     meals: [mealSchema],
   },
-  { collection: "MealLogs" }
+  { collection: "MealLogs", timestamps: true }
 );
 
 const MealSuggestions = model("MealSuggestions", mealSuggestionsSchema);

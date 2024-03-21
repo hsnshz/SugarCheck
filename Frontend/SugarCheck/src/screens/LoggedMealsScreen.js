@@ -41,6 +41,7 @@ const LoggedMealsScreen = ({ navigation }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const toastRef = useRef(null);
 
@@ -194,15 +195,22 @@ const LoggedMealsScreen = ({ navigation }) => {
             <TouchableOpacity
               style={styles.dateButton}
               onPress={() => {
+                setIsCollapsed(!isCollapsed);
                 setExpandedDate(
                   expandedDate.map((expanded, i) =>
                     i === index ? !expanded : expanded
                   )
                 );
               }}
+              activeOpacity={0.8}
             >
               <View style={styles.dateLabel}>
                 <Text style={styles.dateText}>{mealsForDate.date}</Text>
+                {isCollapsed ? (
+                  <Icon name="down" size={20} color={colors.white} />
+                ) : (
+                  <Icon name="up" size={20} color={colors.white} />
+                )}
               </View>
             </TouchableOpacity>
             <Collapsible collapsed={!expandedDate[index]}>
@@ -307,6 +315,8 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   dateLabel: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     backgroundColor: colors.complementary,
     padding: 10,
     borderRadius: 5,
