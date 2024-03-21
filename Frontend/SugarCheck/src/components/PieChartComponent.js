@@ -38,7 +38,6 @@ const PieChartComponent = () => {
         };
       });
 
-    console.log(data);
     setChartData(data);
   }, [latestActivities]);
 
