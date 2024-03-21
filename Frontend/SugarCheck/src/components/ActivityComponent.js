@@ -78,8 +78,6 @@ const ActivityComponent = ({
         }
       );
 
-      console.log(response.data);
-
       if (response.status == 200) {
         onAdd();
       }
