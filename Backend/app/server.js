@@ -9,6 +9,7 @@ import logGlucoseRoutes from "./routes/logGlucoseRoutes.js";
 import emailVerificationRoutes from "./routes/emailVerificationRoutes.js";
 import dietRecipeRoutes from "./routes/dietRecipeRoutes.js";
 import logMealsRoutes from "./routes/logMealsRoutes.js";
+import logExerciseRoutes from "./routes/logExerciseRoutes.js";
 import profileRoutes from "./routes/profileRoutes.js";
 
 const app = express();
@@ -26,6 +27,7 @@ app.use("/api/log", logGlucoseRoutes);
 app.use("/api/email", emailVerificationRoutes);
 app.use("/api/diet", dietRecipeRoutes);
 app.use("/api/meals", logMealsRoutes);
+app.use("/api/exercise", logExerciseRoutes);
 
 app.get("/protected-route", authMiddleware, (req, res) => {
   res.json({ message: "This is a protected route" });

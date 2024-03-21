@@ -45,7 +45,7 @@ const HealthProfile = ({ navigation }) => {
 
   useEffect(() => {
     if (height && weight) {
-      const heightInMeters = height / 100; // Convert height to meters
+      const heightInMeters = height / 100;
       const bmiValue = (weight / (heightInMeters * heightInMeters)).toFixed(2);
       setBmi(bmiValue);
     }

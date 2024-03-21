@@ -122,15 +122,8 @@ function Navbar() {
         name="Exercise"
         component={ExerciseScreen}
         options={{
-          headerShown: true,
+          headerShown: false,
           tabBarIcon: "weight-lifter",
-          headerTitle: "Exercise",
-          headerTitleAlign: "center",
-          headerStyle: {
-            backgroundColor: colors.background,
-            shadowColor: "transparent",
-          },
-          headerTintColor: colors.primary,
           tabBarLabel: "Exercise",
         }}
       />
