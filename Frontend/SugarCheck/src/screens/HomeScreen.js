@@ -16,6 +16,8 @@ import colors from "../../config/colors";
 import axios from "axios";
 import { getNgrokUrl } from "../../config/constants";
 import SecondaryCardComponent from "../components/SecondaryCardComponent";
+import SmallCardComponent from "../components/SmallCardComponent";
+import IconComponent from "../components/IconComponent";
 
 const Home = ({ navigation }) => {
   // useLayoutEffect(() => {
@@ -83,9 +85,22 @@ const Home = ({ navigation }) => {
     return mealsToday.length > 0;
   };
 
+  const hasTakenDiabetesTest = (user) => {
+    if (!user.healthProfile) {
+      return false;
+    }
+
+    if (user?.healthProfile?.riskAssessment.length > 0) {
+      return true;
+    }
+
+    return false;
+  };
+
   useEffect(() => {
     hasLoggedThreeGlucoseValuesToday(user);
     hasLoggedMealToday(mealLogs);
+    hasTakenDiabetesTest(user);
 
     return () => {
       animatedValue.removeAllListeners();
@@ -175,6 +190,11 @@ const Home = ({ navigation }) => {
         </Animated.View>
 
         <View style={styles.contentContainer}>
+          <SmallCardComponent
+            title="Get Started"
+            text="Discover the app's features and how to use them."
+          />
+
           {!isProfileComplete(user) ? (
             <View style={styles.profileCardContainer}>
               <CardComponent
@@ -187,6 +207,15 @@ const Home = ({ navigation }) => {
             </View>
           ) : null}
 
+          {!hasTakenDiabetesTest(user) && (
+            <CardComponent
+              title="Take the Diabetes Test"
+              text="Take the diabetes risk assessment test to know your risk level."
+              btnText="Continue"
+              navigateTo="DiabetesForm"
+            />
+          )}
+
           {!hasLoggedThreeGlucoseValuesToday(user) &&
           !hasLoggedMealToday(mealLogs) ? (
             <View style={styles.mainCardContainer}>
@@ -194,7 +223,7 @@ const Home = ({ navigation }) => {
                 <SecondaryCardComponent
                   title="Log your glucose!"
                   text="You have not logged at least 3 glucose readings today. Tap here to log now."
-                  navigateTo="Glucose Monitor"
+                  navigateTo={() => navigation.navigate("Glucose Monitor")}
                 />
               </View>
 
@@ -202,7 +231,11 @@ const Home = ({ navigation }) => {
                 <SecondaryCardComponent
                   title="Log your meals!"
                   text="Tap here to log a meal for today to keep track of your nutrition."
-                  navigateTo={"Log Meals"}
+                  navigationTo={{
+                    name: "Diet",
+                    screen: "DietTabNavigator",
+                    params: { screen: "Log Meals" },
+                  }}
                 />
               </View>
             </View>
@@ -221,6 +254,39 @@ const Home = ({ navigation }) => {
               navigateTo={"Log Meals"}
             />
           ) : null}
+
+          <SmallCardComponent
+            title="View Reports"
+            text="View your health reports and statistics."
+          />
+
+          <View style={styles.iconsView}>
+            <IconComponent
+              iconName="heart"
+              color={colors.white}
+              navigateTo="Favorite Recipes"
+            />
+            <IconComponent
+              iconName="search"
+              color={colors.white}
+              navigateTo="Recipe Search"
+            />
+            <IconComponent
+              iconName="nutrition"
+              color={colors.white}
+              navigateTo="Nutritional Analysis"
+            />
+            <IconComponent
+              iconName="fast-food"
+              color={colors.white}
+              navigateTo="LoggedMealsScreen"
+            />
+          </View>
+
+          <SmallCardComponent
+            title="Access Resources"
+            text="Access educational resources and articles to learn more about diabetes."
+          />
         </View>
       </Animated.ScrollView>
     </SafeAreaView>
@@ -299,6 +365,13 @@ const styles = StyleSheet.create({
   },
   cardContainer: {
     width: "50%",
+  },
+  iconsView: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginTop: 30,
+    marginBottom: 20,
+    marginHorizontal: 20,
   },
 });
 

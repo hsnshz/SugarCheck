@@ -14,6 +14,8 @@ const NUTRITION_APP_KEY = "f3cf0537ad13211eee37e5558f93928f";
 const FOOD_DB_APP_ID = "70d01e7e";
 const FOOD_DB_APP_KEY = "1807e5f921df87a5a96ee3cc5619ed7f";
 
+const EXERCISE_API = "bbxICjNOAOt7wUrm/s4dbw==va4f46OzsDKi15Zz";
+
 const getConstants = () => {
   // Check if the app is running in development or production mode
   const isDev = __DEV__;
@@ -51,10 +53,15 @@ const getFoodDBAPIInfo = () => {
   };
 };
 
+const getExerciseAPI = () => {
+  return EXERCISE_API;
+};
+
 export {
   getConstants,
   getNgrokUrl,
   getSearchAPIInfo,
   getNutritionAPIInfo,
   getFoodDBAPIInfo,
+  getExerciseAPI,
 };
