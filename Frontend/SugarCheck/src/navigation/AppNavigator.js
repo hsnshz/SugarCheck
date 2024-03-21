@@ -33,6 +33,9 @@ import ResetPassword from "../screens/Profile/ResetPassword";
 import DeleteAccount from "../screens/Profile/DeleteAccount";
 import ChangePassword from "../screens/Profile/ChangePassword";
 import LoggedMealsScreen from "../screens/LoggedMealsScreen";
+import ExerciseScreen from "../screens/ExerciseScreen";
+import ActivityProgress from "../components/ActivityProgress";
+import LogMealsScreen from "../screens/LogMealsScreen";
 
 const Stack = createStackNavigator();
 
@@ -56,13 +59,6 @@ export function RootStackNavigator() {
         component={SignInScreen}
         options={{
           headerShown: false,
-          // title: "",
-          // headerLeft: () => <HeaderBackButton />,
-          // headerStyle: {
-          //   backgroundColor: colors.background,
-          //   borderBottomWidth: 0,
-          //   shadowOpacity: 0,
-          // },
         }}
       />
       <Stack.Screen
@@ -70,13 +66,6 @@ export function RootStackNavigator() {
         component={SignUpScreen}
         options={{
           headerShown: false,
-          // title: "",
-          // headerLeft: () => <HeaderBackButton />,
-          // headerStyle: {
-          //   backgroundColor: colors.background,
-          //   borderBottomWidth: 0,
-          //   shadowOpacity: 0,
-          // },
         }}
       />
       <Stack.Screen
@@ -93,6 +82,13 @@ export function RootStackNavigator() {
         name="ResetPasswordScreen"
         component={ResetPassword}
         options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="ActivityProgress"
+        component={ActivityProgress}
+        options={{
+          headerShown: false,
+        }}
       />
     </Stack.Navigator>
   );
@@ -145,22 +141,6 @@ export function ProfileStackNavigator() {
         component={ResetPassword}
         options={{
           headerShown: false,
-          // headerTitle: "Reset Password",
-          // headerStyle: {
-          //   height: 130,
-          //   backgroundColor: colors.background,
-          //   borderBottomWidth: 0,
-          //   shadowOpacity: 0,
-          // },
-          // headerBackImage: () => (
-          //   <Icon
-          //     name="left"
-          //     size={30}
-          //     color={colors.darkBlue}
-          //     style={{ marginLeft: 20 }}
-          //   />
-          // ),
-          // headerBackTitleVisible: false,
         }}
       />
       <ProfileStack.Screen

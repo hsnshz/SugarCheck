@@ -512,7 +512,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderWidth: 1,
     borderColor: colors.gray,
-    color: colors.black,
+    color: colors.darkBlue,
     paddingRight: 30,
   },
   inputAndroid: {
@@ -523,9 +523,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 8,
     borderWidth: 0.5,
-    borderColor: "purple",
+    borderColor: colors.gray,
     borderRadius: 8,
-    color: colors.black,
+    color: colors.darkBlue,
     paddingRight: 30,
   },
   requirementsView: {

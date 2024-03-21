@@ -12,20 +12,30 @@ import colors from "../../config/colors";
 
 const screenWidth = Dimensions.get("window").width;
 
-const SecondaryCardComponent = ({ title, text, image, navigateTo }) => {
+const SecondaryCardComponent = ({
+  title,
+  text,
+  image,
+  navigateTo,
+  navigationTo,
+  height,
+}) => {
   const navigation = useNavigation();
 
   return (
     <TouchableOpacity
-      onPress={() => navigation.navigate(navigateTo)}
+      onPress={() => {
+        navigateTo ? navigateTo() : navigation.navigate(navigationTo);
+      }}
       activeOpacity={0.8}
     >
-      <Card containerStyle={styles.container}>
+      <Card
+        containerStyle={[styles.container, { height: height ? height : 220 }]}
+      >
         {image && <Card.Image source={image} style={styles.image} />}
         <View style={styles.titleView}>
           <Card.Title style={styles.titleText}>{title}</Card.Title>
         </View>
-        <Card.Divider width={1} />
         <Text style={styles.textContainer}>{text}</Text>
       </Card>
     </TouchableOpacity>
@@ -34,7 +44,7 @@ const SecondaryCardComponent = ({ title, text, image, navigateTo }) => {
 
 const styles = StyleSheet.create({
   container: {
-    height: 250,
+    height: 220,
     width: screenWidth / 2 - 20,
     backgroundColor: colors.white,
     borderRadius: 10,
@@ -57,7 +67,8 @@ const styles = StyleSheet.create({
   },
   titleText: {
     fontFamily: "MontserratBold",
-    fontSize: 18,
+    fontSize: 20,
+    color: colors.darkBlue,
   },
   textContainer: {
     fontFamily: "MontserratRegular",

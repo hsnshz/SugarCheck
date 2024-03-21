@@ -3,21 +3,27 @@ import mongoose, { model } from "mongoose";
 const { Schema } = mongoose;
 
 // ExerciseTracking Schema
-const exerciseTrackingSchema = new Schema(
+const exerciseLogSchema = new Schema(
   {
     userId: { type: Schema.Types.ObjectId, ref: "User" },
     date: Date,
     activities: [
       {
-        activityType: String,
-        duration: Number,
-        intensity: String,
+        activityType: { type: String, default: "" },
+        duration: { type: Number, default: 0, min: 0 },
+        intensity: {
+          type: String,
+          default: "",
+          enum: ["Low", "Moderate", "High"],
+        },
+        caloriesBurned: { type: Number, default: 0, min: 0 },
+        notes: { type: String, default: "" },
       },
     ],
   },
-  { collection: "ExerciseTracking" }
+  { collection: "ExerciseLog", timestamps: true }
 );
 
-const ExerciseTracking = model("ExerciseTracking", exerciseTrackingSchema);
+const ExerciseLog = model("ExerciseLog", exerciseLogSchema);
 
-export { ExerciseTracking };
+export { ExerciseLog };

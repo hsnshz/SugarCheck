@@ -77,7 +77,7 @@ const userSchema = new Schema(
       },
     },
   },
-  { collection: "User" }
+  { collection: "User", timestamps: true }
 );
 
 userSchema.pre("save", function (next) {
