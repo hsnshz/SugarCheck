@@ -18,6 +18,7 @@ import { getNgrokUrl } from "../../config/constants";
 import { useDispatch, useSelector } from "react-redux";
 import { addMealLog } from "../store/slices/mealSlice";
 import * as Haptics from "expo-haptics";
+import Toast from "react-native-fast-toast";
 
 const LogMealSheetContent = ({ toggleSheet, onAdd }) => {
   const user = useSelector((state) => state.user.user) || {};
@@ -43,6 +44,8 @@ const LogMealSheetContent = ({ toggleSheet, onAdd }) => {
   const fiberRef = useRef();
   const notesRef = useRef();
 
+  const toastRef = useRef();
+
   const handleShowTimePicker = () => {
     Keyboard.dismiss();
     setShowTimePicker(true);
@@ -57,7 +60,10 @@ const LogMealSheetContent = ({ toggleSheet, onAdd }) => {
       proteins === "" ||
       fiber === ""
     ) {
-      Alert.alert("Incomplete Form", "Please fill all the fields");
+      toastRef.current.show("Please fill all the fields", {
+        type: "danger",
+      });
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       return;
     } else if (notes === "") {
       setNotes("No notes");
@@ -248,6 +254,16 @@ const LogMealSheetContent = ({ toggleSheet, onAdd }) => {
         >
           <Text style={styles.logBtnText}>Log Meal</Text>
         </TouchableOpacity>
+
+        <Toast
+          ref={toastRef}
+          placement="top"
+          style={{ backgroundColor: colors.darkBlue }}
+          fadeInDuration={750}
+          fadeOutDuration={1000}
+          opacity={1}
+          textStyle={{ color: colors.white, fontFamily: "MontserratRegular" }}
+        />
       </ScrollView>
     </View>
   );
