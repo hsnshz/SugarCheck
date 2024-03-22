@@ -25,6 +25,8 @@ const Home = ({ navigation }) => {
   // }, [navigation]);
 
   const user = useSelector((state) => state.user.user) || {};
+  const token = useSelector((state) => state.auth.token) || "";
+
   const mealLogs = useSelector((state) => state.meal.mealLogs) || [];
 
   const animatedValue = useRef(new Animated.Value(0)).current;
@@ -96,6 +98,10 @@ const Home = ({ navigation }) => {
 
     return false;
   };
+
+  useEffect(() => {
+    console.log(token);
+  }, []);
 
   useEffect(() => {
     hasLoggedThreeGlucoseValuesToday(user);
