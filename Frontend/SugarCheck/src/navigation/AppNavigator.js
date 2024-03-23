@@ -39,6 +39,8 @@ import ActivityProgress from "../components/ActivityProgress";
 import LogMealsScreen from "../screens/LogMealsScreen";
 import ReportGenerationScreen from "../screens/ReportGenerationScreen";
 import PdfViewerScreen from "../screens/PDFViewerScreen";
+import ResourcesScreen from "../screens/ResourcesScreen";
+import ResourceViewerScreen from "../screens/ResourceViewerScreen";
 
 const Stack = createStackNavigator();
 
@@ -244,6 +246,29 @@ export function PDFStackNavigator() {
   );
 }
 
+const ResourcesStack = createStackNavigator();
+
+export function ResourcesStackNavigator() {
+  return (
+    <ResourcesStack.Navigator>
+      <ResourcesStack.Screen
+        name="ResourcesScreen"
+        component={ResourcesScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <ResourcesStack.Screen
+        name="ResourceViewerScreen"
+        component={ResourceViewerScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+    </ResourcesStack.Navigator>
+  );
+}
+
 const Drawer = createDrawerNavigator();
 
 export function DrawerNavigator() {
@@ -315,6 +340,17 @@ export function DrawerNavigator() {
             <MaterialIcon name="file-document" color={color} size={size} />
           ),
           drawerLabel: "Generate Report",
+        }}
+      />
+      <Drawer.Screen
+        name="Resources"
+        component={ResourcesStackNavigator}
+        options={{
+          headerShown: false,
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="ios-book" color={color} size={size} />
+          ),
+          drawerLabel: "Resources",
         }}
       />
       <Drawer.Screen
