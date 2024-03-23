@@ -100,10 +100,6 @@ const Home = ({ navigation }) => {
   };
 
   useEffect(() => {
-    console.log(token);
-  }, []);
-
-  useEffect(() => {
     hasLoggedThreeGlucoseValuesToday(user);
     hasLoggedMealToday(mealLogs);
     hasTakenDiabetesTest(user);
@@ -262,8 +258,9 @@ const Home = ({ navigation }) => {
           ) : null}
 
           <SmallCardComponent
-            title="View Reports"
-            text="View your health reports and statistics."
+            title="Generate Report"
+            text="Generate a report of your health data to monitor your health data and share with your healthcare provider."
+            navigateTo="ReportGeneration"
           />
 
           <View style={styles.iconsView}>
@@ -291,7 +288,8 @@ const Home = ({ navigation }) => {
 
           <SmallCardComponent
             title="Access Resources"
-            text="Access educational resources and articles to learn more about diabetes."
+            text="Access educational resources and articles to learn more about diabetes, nutrition, and exercise."
+            navigateTo="Resources"
           />
         </View>
       </Animated.ScrollView>

@@ -42,10 +42,10 @@ const PdfViewerScreen = ({ navigation, route }) => {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="left" size={35} color={colors.darkBlue} />
+          <Icon name="left" size={35} color={colors.white} />
         </TouchableOpacity>
         <Image
-          source={require("../../assets/icons/DarkAppIcon.png")}
+          source={require("../../assets/icons/AppIcon.png")}
           style={styles.logo}
         />
         <View style={{ width: 35 }} />
@@ -67,22 +67,22 @@ const PdfViewerScreen = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.darkBlue,
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     padding: 20,
-    backgroundColor: colors.background,
+    backgroundColor: colors.darkBlue,
   },
   logo: {
-    width: 50,
-    height: 50,
+    width: 70,
+    height: 70,
   },
   shareButton: {
     position: "absolute",
-    bottom: 30,
+    bottom: 50,
     right: 20,
     backgroundColor: colors.complementary,
     padding: 10,
