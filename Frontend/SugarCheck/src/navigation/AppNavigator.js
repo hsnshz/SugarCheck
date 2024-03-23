@@ -37,6 +37,8 @@ import LoggedMealsScreen from "../screens/LoggedMealsScreen";
 import ExerciseScreen from "../screens/ExerciseScreen";
 import ActivityProgress from "../components/ActivityProgress";
 import LogMealsScreen from "../screens/LogMealsScreen";
+import ReportGenerationScreen from "../screens/ReportGenerationScreen";
+import PdfViewerScreen from "../screens/PDFViewerScreen";
 
 const Stack = createStackNavigator();
 
@@ -219,6 +221,29 @@ export function RecipeStackNavigator() {
   );
 }
 
+const PDFStack = createStackNavigator();
+
+export function PDFStackNavigator() {
+  return (
+    <PDFStack.Navigator>
+      <PDFStack.Screen
+        name="ReportGenerationScreen"
+        component={ReportGenerationScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <PDFStack.Screen
+        name="PdfViewerScreen"
+        component={PdfViewerScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+    </PDFStack.Navigator>
+  );
+}
+
 const Drawer = createDrawerNavigator();
 
 export function DrawerNavigator() {
@@ -279,6 +304,17 @@ export function DrawerNavigator() {
           drawerIcon: ({ color, size }) => (
             <Ionicons name="ios-heart" color={color} size={size} />
           ),
+        }}
+      />
+      <Drawer.Screen
+        name="ReportGeneration"
+        component={PDFStackNavigator}
+        options={{
+          headerShown: false,
+          drawerIcon: ({ color, size }) => (
+            <MaterialIcon name="file-document" color={color} size={size} />
+          ),
+          drawerLabel: "Generate Report",
         }}
       />
       <Drawer.Screen
