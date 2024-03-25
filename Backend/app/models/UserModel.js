@@ -19,8 +19,18 @@ const userSchema = new Schema(
     emailVerificationCode: { type: String, default: "" },
     passwordResetCode: { type: String, default: "" },
     userSettings: {
-      enableReminders: { type: Boolean, default: false },
-      reminderTimes: { type: [String], default: [] },
+      glucoseReminders: {
+        enabled: { type: Boolean, default: false },
+        times: [{ type: Date, default: Date.now() }],
+      },
+      mealReminders: {
+        enabled: { type: Boolean, default: false },
+        times: [{ type: Date, default: Date.now() }],
+      },
+      exerciseNotificationTime: {
+        enabled: { type: Boolean, default: false },
+        time: { type: Date, default: Date.now() },
+      },
     },
     healthProfile: {
       height: { type: Number, default: 0 },

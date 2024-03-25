@@ -41,6 +41,7 @@ import ReportGenerationScreen from "../screens/ReportGenerationScreen";
 import PdfViewerScreen from "../screens/PDFViewerScreen";
 import ResourcesScreen from "../screens/ResourcesScreen";
 import ResourceViewerScreen from "../screens/ResourceViewerScreen";
+import NotificationsSettings from "../screens/Profile/NotificationsSettings";
 
 const Stack = createStackNavigator();
 
@@ -137,6 +138,13 @@ export function ProfileStackNavigator() {
       <ProfileStack.Screen
         name="HealthProfile"
         component={HealthProfile}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <ProfileStack.Screen
+        name="NotificationsSettings"
+        component={NotificationsSettings}
         options={{
           headerShown: false,
         }}

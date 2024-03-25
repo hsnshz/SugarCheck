@@ -29,6 +29,7 @@ import { setUser } from "../store/slices/userSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Icon from "react-native-vector-icons/AntDesign";
 import * as Haptics from "expo-haptics";
+import * as Notifications from "expo-notifications";
 
 const SignInScreen = ({ navigation }) => {
   const dispatch = useDispatch();

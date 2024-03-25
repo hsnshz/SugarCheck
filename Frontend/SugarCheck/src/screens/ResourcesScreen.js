@@ -168,7 +168,10 @@ const ResourcesScreen = ({ navigation }) => {
     return resources.map((resource, index) => (
       <TouchableOpacity
         key={index}
-        style={styles.resource}
+        style={[
+          styles.resource,
+          index === resources.length - 1 && styles.lastResource,
+        ]}
         onPress={() => openURL(resource.url)}
       >
         <View style={styles.rowView}>
@@ -181,7 +184,7 @@ const ResourcesScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 150 }}>
+      <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 100 }}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.openDrawer()}>
             <Ionicons name="ios-menu" size={35} color={colors.darkBlue} />
@@ -301,12 +304,21 @@ const styles = StyleSheet.create({
     textDecorationStyle: "solid",
     textDecorationColor: colors.white,
   },
-  resource: {
+  resourcesContainer: {
     backgroundColor: colors.white,
-    padding: 20,
     marginHorizontal: 20,
-    marginVertical: 5,
-    borderRadius: 5,
+    marginVertical: 20,
+    borderRadius: 10,
+    borderColor: colors.complementary,
+    borderWidth: 1,
+  },
+  resource: {
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.complementary,
+  },
+  lastResource: {
+    borderBottomWidth: 0,
   },
   resourceText: {
     fontFamily: "MontserratRegular",

@@ -23,6 +23,11 @@
     },
     "web": {
       "favicon": "./assets/icons/AppIcon.png"
+    },
+    "notifications": {
+      "icon": "./assets/icons/AppIcon.png",
+      "color": "#000000",
+      "iosDisplayInForeground": true
     }
   }
 }
