@@ -135,7 +135,11 @@ const ProfileScreen = () => {
           <SettingsItem
             title="Notification Settings"
             iconName="bell"
-            onPress={() => {}}
+            onPress={() =>
+              navigation.navigate("Profile", {
+                screen: "NotificationsSettings",
+              })
+            }
           />
           <SettingsItem
             title="Terms & Conditions"

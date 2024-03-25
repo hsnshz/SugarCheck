@@ -8,6 +8,7 @@ import {
   deleteAccount,
   changePassword,
   deleteProfilePicture,
+  updateNotifications,
 } from "../controllers/profileController.js";
 import multer from "multer";
 
@@ -24,6 +25,7 @@ router.delete(
   authMiddleware,
   deleteProfilePicture
 );
+router.put("/update-notifications/:id", authMiddleware, updateNotifications);
 router.post("/request-reset", requestPasswordReset);
 router.post("/reset-password", resetPassword);
 router.put("/change-password/:id", authMiddleware, changePassword);
