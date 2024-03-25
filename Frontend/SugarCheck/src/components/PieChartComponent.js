@@ -65,7 +65,6 @@ const PieChartComponent = () => {
       );
 
       setIsLoading(false);
-      console.log(response.data);
 
       if (response.status === 200) {
         setlatestActivities(response.data.activities);

@@ -81,6 +81,41 @@ export async function deleteProfilePicture(req, res) {
   }
 }
 
+export async function updateNotifications(req, res) {
+  try {
+    const { glucoseReminders, mealReminders, exerciseNotificationTime } =
+      req.body;
+
+    // Check if the authenticated user is the same as the user to be updated
+    if (req.user.userId !== req.params.id) {
+      return res.status(403).send({ error: "Authorization failed." });
+    }
+
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).send({ error: "User not found" });
+    }
+
+    if (glucoseReminders !== undefined)
+      user.userSettings.glucoseReminders = glucoseReminders;
+    if (mealReminders !== undefined)
+      user.userSettings.mealReminders = mealReminders;
+    if (exerciseNotificationTime !== undefined)
+      user.userSettings.exerciseNotificationTime = exerciseNotificationTime;
+
+    await user.save();
+
+    res.status(200).send({
+      userSettings: user.userSettings,
+      message: "Notifications updated successfully",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: error.message });
+  }
+}
+
 export async function requestPasswordReset(req, res) {
   try {
     const { email } = req.body;
