@@ -15,8 +15,18 @@ const initialState = {
     emailVerificationCode: "",
     passwordResetCode: "",
     userSettings: {
-      enableReminders: false,
-      reminderTimes: [],
+      glucoseReminders: {
+        enabled: false,
+        times: [""],
+      },
+      mealReminders: {
+        enabled: false,
+        times: [""],
+      },
+      exerciseNotificationTime: {
+        enabled: false,
+        time: "",
+      },
     },
     healthProfile: {
       height: 0,

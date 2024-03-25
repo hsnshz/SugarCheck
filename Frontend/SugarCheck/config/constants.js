@@ -3,7 +3,8 @@ const LOCAL_IP = "10.100.136.98";
 const DEV_API_URL = `http://${LOCAL_IP}:3000`;
 const PROD_API_URL = "https://api.example.com";
 
-const NGROK_URL = "https://b305-161-74-224-7.ngrok-free.app";
+const NGROK_URL =
+  "https://b4f4-2a00-23ee-1048-10d2-984b-9ab1-28ec-bd53.ngrok-free.app";
 
 const RECIPE_SEARCH_APP_ID = "7f711a72";
 const RECIPE_SEARCH_APP_KEY = "8927d3e7e21941f81f8fb0379b5b6d12";

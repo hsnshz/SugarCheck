@@ -28,6 +28,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Icon from "react-native-vector-icons/AntDesign";
 import moment from "moment";
 import * as Haptics from "expo-haptics";
+import * as Notifications from "expo-notifications";
 
 const SignUpScreen = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -196,6 +197,7 @@ const SignUpScreen = ({ navigation }) => {
         // Store the token in local storage or state management library
         dispatch(setToken(response.data.token));
         dispatch(setUser(response.data.user));
+        setupNotifications();
       }
     } catch (error) {
       console.error("An error occurred:", error);
@@ -249,6 +251,15 @@ const SignUpScreen = ({ navigation }) => {
       }
     }
   };
+
+  async function setupNotifications() {
+    const { status } = await Notifications.getPermissionsAsync();
+
+    if (status !== "granted") {
+      alert("You need to enable notifications in your settings");
+      return;
+    }
+  }
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
