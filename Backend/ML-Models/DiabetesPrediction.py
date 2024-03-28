@@ -103,15 +103,24 @@ def predict_diabetes(model, input_values):
 saved_model = pickle.dumps(final_rf)
 
 # Save the model to disk
-with open("Backend/ML-Models/final_predict_model.pkl", "wb") as file:
+with open(
+    "/Users/hassanshahzad/Desktop/Westminster/Year3/FinalYearProject/SugarCheck/ModelFiles/model.pkl",
+    "wb",
+) as file:
     pickle.dump(final_rf, file)
 
 # Save encoders to disk
-with open("Backend/ML-Models/encoders.pkl", "wb") as file:
+with open(
+    "/Users/hassanshahzad/Desktop/Westminster/Year3/FinalYearProject/SugarCheck/ModelFiles/encoders.pkl",
+    "wb",
+) as file:
     pickle.dump(encoders, file)
 
 # Save MinMaxScaler to disk
-with open("Backend/ML-Models/minmax.pkl", "wb") as file:
+with open(
+    "/Users/hassanshahzad/Desktop/Westminster/Year3/FinalYearProject/SugarCheck/ModelFiles/minmax.pkl",
+    "wb",
+) as file:
     pickle.dump(minmax, file)
 
 

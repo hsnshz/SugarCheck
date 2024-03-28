@@ -15,18 +15,18 @@ def index():
 
 
 # Load the diabetes model from disk
-with open("Backend/FlaskApp/final_predict_model.pkl", "rb") as file:
+with open("final_predict_model.pkl", "rb") as file:
     diabetes_model = pickle.load(file)
 # Load the encoders and scaler from disk
-with open("Backend/FlaskApp/encoders.pkl", "rb") as file:
+with open("encoders.pkl", "rb") as file:
     encoders = pickle.load(file)
-with open("Backend/FlaskApp/minmax.pkl", "rb") as file:
+with open("minmax.pkl", "rb") as file:
     minmax = pickle.load(file)
 # Load the a1c model, scaler, and selector
-a1c_model = load_model("Backend/FlaskApp/a1c_model.keras")
-with open("Backend/FlaskApp/scaler.pkl", "rb") as f:
+a1c_model = load_model("a1c_model.keras")
+with open("scaler.pkl", "rb") as f:
     scaler = pickle.load(f)
-with open("Backend/FlaskApp/selector.pkl", "rb") as f:
+with open("selector.pkl", "rb") as f:
     selector = pickle.load(f)
 
 
