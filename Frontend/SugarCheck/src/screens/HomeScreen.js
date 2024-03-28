@@ -27,6 +27,10 @@ const Home = ({ navigation }) => {
   const user = useSelector((state) => state.user.user) || {};
   const token = useSelector((state) => state.auth.token) || "";
 
+  useEffect(() => {
+    console.log(token);
+  }, [token]);
+
   const mealLogs = useSelector((state) => state.meal.mealLogs) || [];
 
   const animatedValue = useRef(new Animated.Value(0)).current;

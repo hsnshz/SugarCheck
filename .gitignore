@@ -1,12 +1,19 @@
 # Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
 
+# .gitignore
+
+# secrets
+secrets/
+
 # dependencies
 node_modules/
+Frontend/SugarCheck/node_modules/
+Backend/app/node_modules/
 
 # Expo
-.expo/
-dist/
-web-build/
+Frontend/SugarCheck/.expo/
+Frontend/SugarCheck/dist/
+Frontend/SugarCheck/web-build/
 
 # Native
 *.orig.*
@@ -17,7 +24,7 @@ web-build/
 *.mobileprovision
 
 # Metro
-.metro-health-check*
+Frontend/SugarCheck/.metro-health-check*
 
 # debug
 npm-debug.*
@@ -35,3 +42,4 @@ Frontend/SugarCheck/config/constants.js
 
 # typescript
 *.tsbuildinfo
+Frontend/SugarCheck/*.tsbuildinfo
