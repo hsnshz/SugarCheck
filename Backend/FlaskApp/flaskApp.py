@@ -4,73 +4,29 @@ import pickle
 import pandas as pd
 import numpy as np
 from keras.models import load_model
-import firebase_admin
-import firebase_admin
-from firebase_admin import credentials, storage
-import requests
-import os
-from datetime import timedelta
-
-
-# Firebase Admin initialization
-cred = credentials.Certificate(
-    "/Users/hassanshahzad/Desktop/Westminster/Year3/FinalYearProject/sugarcheck-0-firebase-adminsdk-sirmc-444be3e09d.json"
-)
-firebase_admin.initialize_app(cred, {"storageBucket": "sugarcheck-0.appspot.com"})
-
-
-def download_file_from_firebase(file_name, local_file_path):
-    bucket = storage.bucket()
-    blob = bucket.blob(file_name)
-    url = blob.generate_signed_url(timedelta(minutes=5), method="GET")
-
-    # Ensure the directory exists
-    os.makedirs(os.path.dirname(local_file_path), exist_ok=True)
-
-    try:
-        response = requests.get(url)
-        response.raise_for_status()
-        with open(local_file_path, "wb") as file:
-            file.write(response.content)
-    except requests.exceptions.HTTPError as err:
-        print(f"HTTP error occurred: {err}")
-
-
-# Download model and encoder files from Firebase Cloud Storage
-files_to_download = [
-    "ModelFiles/final_predict_model.pkl",
-    "ModelFiles/encoders.pkl",
-    "ModelFiles/minmax.pkl",
-    "ModelFiles/a1c_model.keras",
-    "ModelFiles/scaler.pkl",
-    "ModelFiles/selector.pkl",
-]
-
-for file_name in files_to_download:
-    local_file_path = os.path.join(
-        "ModelFiles", os.path.basename(file_name)
-    )  # Adjust the path according to your local directory structure
-    download_file_from_firebase(file_name, local_file_path)
-
 
 app = Flask(__name__)
 CORS(app)
 
 
-# Load the diabetes model
-with open("ModelFiles/final_predict_model.pkl", "rb") as file:
-    diabetes_model = pickle.load(file)
-# Load the encoders and scaler
-with open("ModelFiles/encoders.pkl", "rb") as file:
-    encoders = pickle.load(file)
-with open("ModelFiles/minmax.pkl", "rb") as file:
-    minmax = pickle.load(file)
+@app.route("/")
+def index():
+    return "Hello, World!"
 
+
+# Load the diabetes model from disk
+with open("final_predict_model.pkl", "rb") as file:
+    diabetes_model = pickle.load(file)
+# Load the encoders and scaler from disk
+with open("encoders.pkl", "rb") as file:
+    encoders = pickle.load(file)
+with open("minmax.pkl", "rb") as file:
+    minmax = pickle.load(file)
 # Load the a1c model, scaler, and selector
-a1c_model = load_model("ModelFiles/a1c_model.keras")
-with open("ModelFiles/scaler.pkl", "rb") as f:
+a1c_model = load_model("a1c_model.keras")
+with open("scaler.pkl", "rb") as f:
     scaler = pickle.load(f)
-with open("ModelFiles/selector.pkl", "rb") as f:
+with open("selector.pkl", "rb") as f:
     selector = pickle.load(f)
 
 
@@ -160,11 +116,6 @@ def estimate_a1c():
     # Return the prediction
     print(prediction[0].tolist())
     return jsonify(prediction[0].tolist())
-
-
-@app.route("/")
-def index():
-    return "Hello, World!"
 
 
 if __name__ == "__main__":

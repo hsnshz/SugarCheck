@@ -1,111 +1,3 @@
-# import pandas as pd
-# import numpy as np
-# from sklearn.model_selection import (
-#     train_test_split,
-#     GridSearchCV,
-#     cross_val_score,
-#     KFold,
-# )
-# from sklearn.preprocessing import StandardScaler, OneHotEncoder
-# from sklearn.compose import ColumnTransformer
-# from sklearn.pipeline import Pipeline
-# from sklearn.ensemble import RandomForestRegressor
-# from sklearn.metrics import mean_squared_error
-# from sklearn.feature_selection import SelectKBest, f_regression
-# import unittest
-# import pickle
-
-# print()
-# print("A1c Estimation Model")
-# print("--------------------------------------------------")
-# print()
-
-# # Load the data
-# df = pd.read_csv("Dataset/dummy_diabetes_data.csv")
-
-# # Check for missing values and handle them
-# df = df.dropna()
-
-# # Define the features and target variable
-# X = df.drop("Hba1c_Level", axis=1)
-# y = df["Hba1c_Level"]
-
-# # Split the data into training and test sets
-# X_train, X_test, y_train, y_test = train_test_split(
-#     X, y, test_size=0.2, random_state=42
-# )
-
-# # Define preprocessing for numeric and categorical features
-# numeric_features = ["Age", "BMI", "Blood_Glucose_Level"]
-# numeric_transformer = Pipeline(
-#     steps=[
-#         ("scaler", StandardScaler()),
-#         ("selector", SelectKBest(f_regression, k=1)),
-#     ]
-# )
-
-# categorical_features = ["Gender"]
-# categorical_transformer = OneHotEncoder()
-
-# preprocessor = ColumnTransformer(
-#     transformers=[
-#         ("num", numeric_transformer, numeric_features),
-#         ("cat", categorical_transformer, categorical_features),
-#     ]
-# )
-
-# # Define the model
-# model = RandomForestRegressor(n_estimators=100, random_state=42)
-
-# # Create the preprocessing and training pipeline
-# pipeline = Pipeline(steps=[("preprocessor", preprocessor), ("model", model)])
-
-# # Define the parameter grid for GridSearchCV
-# param_grid = {
-#     "model__n_estimators": [50, 100, 150, 200],
-#     "model__max_depth": [None, 3, 5, 10],
-#     "model__min_samples_split": [2, 5, 10],
-# }
-
-# # Set up GridSearchCV
-# grid_search = GridSearchCV(
-#     pipeline, param_grid, cv=10, scoring="neg_mean_squared_error", error_score="raise"
-# )
-
-# # Train the model
-# grid_search.fit(X_train, y_train)
-
-# # Get the best parameters and set them to the pipeline
-# best_params = grid_search.best_params_
-# pipeline.set_params(**best_params)
-
-# # Fit the pipeline again with the best parameters
-# pipeline.fit(X_train, y_train)
-
-# # Predict and evaluate the model using the pipeline
-# y_pred = pipeline.predict(X_test)
-# mse = mean_squared_error(y_test, y_pred)
-# rmse = mse**0.5
-# print(f"Test RMSE: {rmse}")
-
-# # Check for overfitting
-# y_train_pred = pipeline.predict(X_train)
-# mse_train = mean_squared_error(y_train, y_train_pred)
-# rmse_train = mse_train**0.5
-# print(f"Train RMSE: {rmse_train}")
-
-# # Define the KFold cross-validator
-# kfold = KFold(n_splits=10, shuffle=True, random_state=42)
-
-# # Evaluate the model using cross-validation
-# scores = cross_val_score(pipeline, X, y, cv=kfold, scoring="neg_mean_squared_error")
-
-# # Take the square root of the scores to get the RMSE
-# rmse_scores = np.sqrt(-scores)
-
-# print(f"Cross-validated RMSE: {rmse_scores.mean()}")
-# print()
-
 import pandas as pd
 import numpy as np
 from sklearn.feature_selection import SelectKBest, f_classif
@@ -255,14 +147,22 @@ max_value = y_train.max()
 print(f"Range of target variable: {min_value} to {max_value}")
 
 # Save the model
-model.save("Backend/ML-Models/A1c-Estimation/a1c_model.keras")
+model.save(
+    "/Users/hassanshahzad/Desktop/Westminster/Year3/FinalYearProject/SugarCheck/ModelFiles/saved_model.pb"
+)
 
 # Save the scaler
-with open("Backend/ML-Models/A1c-Estimation/scaler.pkl", "wb") as file:
+with open(
+    "/Users/hassanshahzad/Desktop/Westminster/Year3/FinalYearProject/SugarCheck/ModelFiles/scaler.pkl",
+    "wb",
+) as file:
     pickle.dump(scaler, file)
 
 # Save the selector
-with open("Backend/ML-Models/A1c-Estimation/selector.pkl", "wb") as file:
+with open(
+    "/Users/hassanshahzad/Desktop/Westminster/Year3/FinalYearProject/SugarCheck/ModelFiles/selector.pkl",
+    "wb",
+) as file:
     pickle.dump(selector, file)
 
 
