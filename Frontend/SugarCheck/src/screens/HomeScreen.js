@@ -20,16 +20,8 @@ import SmallCardComponent from "../components/SmallCardComponent";
 import IconComponent from "../components/IconComponent";
 
 const Home = ({ navigation }) => {
-  // useLayoutEffect(() => {
-  //   setHeaderOptions(navigation);
-  // }, [navigation]);
-
   const user = useSelector((state) => state.user.user) || {};
   const token = useSelector((state) => state.auth.token) || "";
-
-  useEffect(() => {
-    console.log(token);
-  }, [token]);
 
   const mealLogs = useSelector((state) => state.meal.mealLogs) || [];
 
@@ -188,10 +180,19 @@ const Home = ({ navigation }) => {
           <Text
             style={[
               styles.welcomeText,
-              { marginTop: 10, fontSize: 20, fontFamily: "MontserratRegular" },
+              { marginTop: 15, fontSize: 20, fontFamily: "MontserratRegular" },
             ]}
           >
             How are you feeling today?
+          </Text>
+
+          <Text
+            style={[
+              styles.welcomeText,
+              { marginTop: 15, fontSize: 20, fontFamily: "MontserratRegular" },
+            ]}
+          >
+            {new Date().toDateString()}
           </Text>
         </Animated.View>
 
@@ -199,6 +200,7 @@ const Home = ({ navigation }) => {
           <SmallCardComponent
             title="Get Started"
             text="Discover the app's features and how to use them."
+            navigateTo="GetStarted"
           />
 
           {!isProfileComplete(user) ? (

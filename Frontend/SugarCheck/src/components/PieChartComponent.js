@@ -82,7 +82,7 @@ const PieChartComponent = () => {
           color={colors.darkBlue}
           style={{ alignSelf: "center", marginTop: 60 }}
         />
-      ) : (
+      ) : latestActivities.length > 0 ? (
         <>
           <PieChart
             donut
@@ -144,6 +144,10 @@ const PieChartComponent = () => {
             ))}
           </View>
         </>
+      ) : (
+        <View style={styles.noActivitiesView}>
+          <Text style={styles.noActivitiesText}>No activities found</Text>
+        </View>
       )}
     </>
   );
@@ -171,6 +175,16 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: colors.white,
     fontFamily: "MontserratRegular",
+  },
+  noActivitiesView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  noActivitiesText: {
+    fontFamily: "MontserratRegular",
+    fontSize: 16,
+    color: colors.white,
   },
 });
 

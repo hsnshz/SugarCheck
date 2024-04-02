@@ -35,3 +35,37 @@ export async function getHealthProfile(req, res) {
     res.status(500).send({ error: error.message });
   }
 }
+
+export async function addRiskScore(req, res) {
+  try {
+    const { riskScore } = req.body;
+
+    console.log("req.user._id:", req.user.userId);
+    console.log("req.params.id:", req.params.id);
+
+    // Check if the authenticated user is the same as the user to be updated
+    if (req.user.userId !== req.params.id) {
+      return res.status(403).send({ error: "Authorization failed." });
+    }
+
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).send({ error: "User not found" });
+    }
+
+    if (user.healthProfile.riskAssessment.length > 0) {
+      user.healthProfile.riskAssessment[
+        user.healthProfile.riskAssessment.length - 1
+      ].riskScore = riskScore;
+    } else {
+      return res.status(400).send({ error: "No risk assessment to update" });
+    }
+
+    await user.save();
+
+    res.status(200).send({ user, message: "Risk score added successfully" });
+  } catch (error) {
+    res.status(500).send({ error: error.message });
+  }
+}

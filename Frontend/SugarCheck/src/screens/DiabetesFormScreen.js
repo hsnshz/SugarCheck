@@ -13,6 +13,7 @@ import {
   Keyboard,
   ScrollView,
   Animated,
+  RefreshControl,
 } from "react-native";
 import FormItem from "../components/FormItem";
 import colors from "../../config/colors";
@@ -26,6 +27,7 @@ import { updateHealthProfile } from "../store/slices/userSlice";
 import { useDispatch } from "react-redux";
 import { Ionicons } from "@expo/vector-icons";
 import Icon from "react-native-vector-icons/AntDesign";
+import * as Haptics from "expo-haptics";
 
 const { width: viewportWidth } = Dimensions.get("window");
 
@@ -50,6 +52,31 @@ const DiabetesForm = ({ navigation }) => {
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const carouselRef = useRef(null);
+
+  const onRefresh = () => {
+    setPredictionResult("");
+    setFormData({
+      polyuria: "",
+      polydipsia: "",
+      "sudden weight loss": "",
+      weakness: "",
+      polyphagia: "",
+      "genital thrush": "",
+      "visual blurring": "",
+      itching: "",
+      irritability: "",
+      "delayed healing": "",
+      "partial paresis": "",
+      "muscle stiffness": "",
+      alopecia: "",
+      obesity: "",
+    });
+
+    carouselRef.current?.scrollTo({
+      index: 0,
+      animated: true,
+    });
+  };
 
   useEffect(() => {
     if (user) {
@@ -270,42 +297,22 @@ const DiabetesForm = ({ navigation }) => {
   };
 
   const renderQuestion = (question) => {
-    switch (question.type) {
-      // case "input":
-      //   return (
-      //     <View style={styles.inputRow}>
-      //       <Text style={styles.inputLabel}>{question.label}</Text>
-      //       <TextInput
-      //         style={styles.input}
-      //         value={formData[question.field]}
-      //         onChangeText={(text) =>
-      //           setFormData({ ...formData, [question.field]: text })
-      //         }
-      //         placeholder={question.label}
-      //         keyboardType={question.keyboardType}
-      //       />
-      //     </View>
-      //   );
-      case "radio":
-        return (
-          <FormItem
-            label={question.label}
-            selectedValue={formData[question.field]}
-            onValueChange={(value) => handleRadioChange(question.field, value)}
-            options={question.options.map((option) => ({
-              label: option,
-              value: option.toLowerCase(),
-            }))}
-            displayInformation={() => {
-              setShowInformation(true);
-              fadeIn();
-            }}
-            setSelectedInfoLabel={setSelectedInfoLabel}
-          />
-        );
-      default:
-        return null;
-    }
+    return (
+      <FormItem
+        label={question.label}
+        selectedValue={formData[question.field]}
+        onValueChange={(value) => handleRadioChange(question.field, value)}
+        options={question.options.map((option) => ({
+          label: option,
+          value: option.toLowerCase(),
+        }))}
+        displayInformation={() => {
+          setShowInformation(true);
+          fadeIn();
+        }}
+        setSelectedInfoLabel={setSelectedInfoLabel}
+      />
+    );
   };
 
   const renderItem = ({ item, index }) => {
@@ -371,6 +378,8 @@ const DiabetesForm = ({ navigation }) => {
           );
         }
 
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
         setPredictionResult(response.data.predictionResult);
       })
       .catch((error) => {
@@ -380,7 +389,10 @@ const DiabetesForm = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 200 }}>
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 150 }}
+        refreshControl={<RefreshControl onRefresh={onRefresh} />}
+      >
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.openDrawer()}>
             <Ionicons name="ios-menu" size={35} color={colors.darkBlue} />
@@ -410,21 +422,21 @@ const DiabetesForm = ({ navigation }) => {
           height={400}
           loop={false}
           lockScrollWhileSnapping
-          // onSnapToItem={(index) => {
-          //   if (isStepComplete(currentIndex)) {
-          //     setCurrentIndex(index);
-          //   } else if (index > currentIndex) {
-          //     carouselRef.current?.scrollTo({
-          //       index: currentIndex,
-          //       animated: true,
-          //     });
-          //     Alert.alert("Please fill out all fields to continue");
-          //   }
-          // }}
+          onSnapToItem={(index) => {
+            if (isStepComplete(currentIndex)) {
+              setCurrentIndex(index);
+            } else if (index > currentIndex) {
+              carouselRef.current?.scrollTo({
+                index: currentIndex,
+                animated: true,
+              });
+              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+            }
+          }}
         />
 
         {showInformation &&
-          formQuestions.map((question) =>
+          formQuestions.map((question, index) =>
             question.label === selectedInfoLabel ? (
               <TouchableWithoutFeedback
                 key={question.label}
@@ -464,7 +476,8 @@ const DiabetesForm = ({ navigation }) => {
                 />
                 <Heading>Prediction Result</Heading>
                 <Text style={styles.detailText}>
-                  Based on the information provided, you are likely to have
+                  Based on the information provided, you are{" "}
+                  <Text style={{ fontWeight: "bold" }}>likely</Text> to have
                   diabetes
                 </Text>
                 <Text style={styles.detailText}>
@@ -483,7 +496,8 @@ const DiabetesForm = ({ navigation }) => {
                 />
                 <Heading>Prediction Result</Heading>
                 <Text style={styles.detailText}>
-                  Based on the information provided, you are unlikely to have
+                  Based on the information provided, you are{" "}
+                  <Text style={{ fontWeight: "bold" }}>unlikely</Text> to have
                   diabetes
                 </Text>
                 <Text style={styles.detailText}>
@@ -519,6 +533,7 @@ const DiabetesForm = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   safeArea: {
+    flex: 1,
     backgroundColor: colors.background,
   },
   heading: {
@@ -664,8 +679,9 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "center",
+    paddingTop: 300,
     alignItems: "center",
+    zIndex: 10,
   },
   informationBox: {
     backgroundColor: colors.white,

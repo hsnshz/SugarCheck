@@ -82,11 +82,12 @@ const ChartComponent = ({
                   height={260}
                   yAxisLabel=""
                   yAxisSuffix="mg/dL"
-                  yAxisInterval={1}
-                  yLabelsOffset={1}
+                  yAxisInterval={5}
+                  yLabelsOffset={2}
+                  xLabelsOffset={5}
                   chartConfig={{
-                    backgroundColor: colors.detail,
-                    backgroundGradientFrom: colors.primary,
+                    backgroundColor: colors.primary,
+                    backgroundGradientFrom: colors.detail,
                     backgroundGradientTo: colors.complementary,
                     decimalPlaces: 1,
                     color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
@@ -101,6 +102,9 @@ const ChartComponent = ({
                   style={styles.chart}
                   withHorizontalLabels={true}
                   withHorizontalLines={true}
+                  withVerticalLines={true}
+                  bezier
+                  segments={3}
                 />
               </ScrollView>
             ) : (

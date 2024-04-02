@@ -44,11 +44,15 @@ const Exercise = ({ navigation }) => {
   const [collapsedStates, setCollapsedStates] = useState({});
   const [loadingStates, setLoadingStates] = useState({});
 
+  const [isActivitiesUpdated, setIsActivitiesUpdated] = useState(false);
+
   const toastRef = useRef(null);
 
   const onRefresh = async () => {
     setIsRefreshing(true);
+    setIsActivitiesUpdated(false);
     fetchActivities();
+    setIsActivitiesUpdated(true);
     setIsRefreshing(false);
   };
 
@@ -121,6 +125,7 @@ const Exercise = ({ navigation }) => {
 
   useEffect(() => {
     fetchActivities();
+    setIsActivitiesUpdated(true);
   }, []);
 
   const handleAdd = () => {
@@ -128,11 +133,13 @@ const Exercise = ({ navigation }) => {
       toggleSheet();
     }
 
+    setIsActivitiesUpdated(false);
     setActivityType("");
     setCaloriesBurned(0);
     setDuration(0);
     setIntensity("");
     setNotes("");
+    setIsActivitiesUpdated(true);
 
     toastRef.current.show("Activity logged successfully", {
       type: "success",
@@ -162,7 +169,7 @@ const Exercise = ({ navigation }) => {
 
         <View style={styles.progressContainer}>
           <View style={styles.chartContainer}>
-            <PieChartComponent />
+            {isActivitiesUpdated && <PieChartComponent />}
           </View>
 
           <SecondaryCardComponent
