@@ -7,6 +7,7 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Image,
+  SafeAreaView,
 } from "react-native";
 import { ButtonSecondary } from "../../../config/styledText";
 import colors from "../../../config/colors";
@@ -100,10 +101,7 @@ const HealthProfile = ({ navigation }) => {
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 200 : 200}
-    >
+    <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Icon name="left" size={30} color={colors.darkBlue} />
@@ -116,8 +114,7 @@ const HealthProfile = ({ navigation }) => {
       </View>
 
       <ScrollView
-        style={styles.container}
-        contentContainerStyle={{ flexGrow: 1, paddingBottom: 300 }}
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 100, padding: 20 }}
       >
         <Text style={styles.label}>Height (cm):</Text>
         <TextInput
@@ -200,13 +197,13 @@ const HealthProfile = ({ navigation }) => {
         opacity={1}
         textStyle={{ color: colors.white, fontFamily: "MontserratRegular" }}
       />
-    </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
+    flex: 1,
     backgroundColor: colors.background,
   },
   header: {
@@ -214,7 +211,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     backgroundColor: colors.background,
-    marginTop: 60,
     padding: 20,
   },
   logo: {

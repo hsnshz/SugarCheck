@@ -90,6 +90,7 @@ const FavoriteRecipesScreen = ({ navigation }) => {
         refreshControl={
           <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
         }
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 100 }}
       >
         <Text style={styles.title}>Favorite Recipes</Text>
 

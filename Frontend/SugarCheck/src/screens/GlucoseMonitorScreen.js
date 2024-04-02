@@ -12,6 +12,8 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   Animated,
+  Image,
+  SafeAreaView,
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { setHeaderOptions } from "../components/HeaderOptions";
@@ -28,8 +30,12 @@ import {
 import ChartComponent from "../components/ChartComponent";
 import ListComponent from "../components/ListComponent";
 import AntDesign from "react-native-vector-icons/AntDesign";
+import { Ionicons } from "@expo/vector-icons";
 import { ProgressBar } from "react-native-paper";
 import Sheet from "../components/Sheet";
+import Dialog from "react-native-dialog";
+import Toast from "react-native-fast-toast";
+import * as Haptics from "expo-haptics";
 
 const GlucoseMonitorScreen = ({ navigation }) => {
   useLayoutEffect(() => {
@@ -58,10 +64,13 @@ const GlucoseMonitorScreen = ({ navigation }) => {
   const [latestGlucoseValues, setLatestGlucoseValues] = useState([]);
 
   const [sheetVisible, setSheetVisible] = useState(false);
+  const [isDialogVisible, setIsDialogVisible] = useState(false);
 
   const [dates, setDates] = useState([]);
   const [times, setTimes] = useState([]);
   const [buttonDisabled, setButtonDisabled] = useState(false);
+
+  const [riskScore, setRiskScore] = useState("");
 
   const [bmi] = useState(user?.healthProfile?.bmi ? user.healthProfile.bmi : 0);
   const [age] = useState(
@@ -84,6 +93,9 @@ const GlucoseMonitorScreen = ({ navigation }) => {
 
   let gender_male = 0;
   let gender_female = 0;
+
+  const toastRef = useRef();
+  const scrollRef = useRef();
 
   useEffect(() => {
     fetchGlucoseValues(selectedDate);
@@ -160,10 +172,28 @@ const GlucoseMonitorScreen = ({ navigation }) => {
     });
   };
 
+  // Helper function to sort arrays based on timestamps
+  const sortArrays = (
+    newTimes,
+    newGlucoseValues,
+    newTimestamps,
+    newGlucoseIds
+  ) => {
+    const sortedIndices = newTimestamps
+      .map((value, index) => ({ value, index }))
+      .sort((a, b) => new Date(a.value) - new Date(b.value))
+      .map(({ index }) => index);
+
+    setTimes(sortedIndices.map((index) => newTimes[index]));
+    setGlucoseValues(sortedIndices.map((index) => newGlucoseValues[index]));
+    setTimestamps(sortedIndices.map((index) => newTimestamps[index]));
+    setGlucoseIds(sortedIndices.map((index) => newGlucoseIds[index]));
+  };
+
   useEffect(() => {
     const dateString = selectedDate.toISOString().split("T")[0];
 
-    if (inputValue == "" || valuesPerDay[dateString] >= 3) {
+    if (valuesPerDay[dateString] >= 3) {
       setButtonDisabled(true);
     } else {
       setButtonDisabled(false);
@@ -181,13 +211,7 @@ const GlucoseMonitorScreen = ({ navigation }) => {
         },
       })
       .then((response) => {
-        console.log(
-          "Fetched glucose values:",
-          response.data.data.glucoseValues
-        );
-        console.log("Fetched timestamps:", response.data.data.timestamps);
-
-        const dates = response.data.data.timestamps.map((timestamp) => {
+        const newDates = response.data.data.timestamps.map((timestamp) => {
           const date = new Date(timestamp);
           if (isNaN(date.getTime())) {
             console.error(`Invalid timestamp: ${timestamp}`);
@@ -196,7 +220,7 @@ const GlucoseMonitorScreen = ({ navigation }) => {
           return date.toISOString().split("T")[0];
         });
 
-        const times = response.data.data.timestamps.map((timestamp) => {
+        const newTimes = response.data.data.timestamps.map((timestamp) => {
           const date = new Date(timestamp);
           if (isNaN(date.getTime())) {
             console.error(`Invalid timestamp: ${timestamp}`);
@@ -209,18 +233,17 @@ const GlucoseMonitorScreen = ({ navigation }) => {
           });
         });
 
-        setDates(dates);
-        setTimes(times);
+        const newGlucoseValues = response.data.data.glucoseValues;
+        const newTimestamps = response.data.data.timestamps;
+        const newGlucoseIds = response.data.data.glucoseIds;
 
-        setGlucoseValues(response.data.data.glucoseValues);
-        setTimestamps(response.data.data.timestamps);
-        setGlucoseIds(response.data.data.glucoseIds);
+        sortArrays(newTimes, newGlucoseValues, newTimestamps, newGlucoseIds);
+
+        setDates(newDates);
         setValuesPerDay((prevValues) => ({
           ...prevValues,
-          [dateString]: response.data.data.glucoseValues.length,
+          [dateString]: newGlucoseValues.length,
         }));
-
-        console.log("");
       })
       .catch((error) => {
         console.error("Failed to fetch glucose values:", error);
@@ -259,9 +282,6 @@ const GlucoseMonitorScreen = ({ navigation }) => {
       timestamp: recordedTime,
     };
 
-    console.log("Data to send: ", dataToSend);
-    console.log(`${getNgrokUrl()}/api/log/glucose/${user._id}`);
-
     axios
       .post(`${getNgrokUrl()}/api/log/glucose/${user._id}`, dataToSend, {
         headers: {
@@ -271,23 +291,21 @@ const GlucoseMonitorScreen = ({ navigation }) => {
       })
       .then((response) => {
         setLastIndexSent(glucoseValues.length);
-        console.log("Success:", response.data);
 
         const newTime = timestamp.toLocaleTimeString("en-US", {
           hour: "numeric",
           minute: "numeric",
           hour12: true,
         });
-        setTimes((prevTimes) => [...prevTimes, newTime]);
-        setGlucoseValues((prevGlucoseValues) => [
-          ...prevGlucoseValues,
-          Number(inputValue),
-        ]);
-        setTimestamps((prevTimestamps) => [...prevTimestamps, recordedTime]);
-        setGlucoseIds((prevGlucoseIds) => [
-          ...prevGlucoseIds,
-          response.data.data.id,
-        ]);
+
+        // Create new arrays with the new values
+        const newTimes = [...times, newTime];
+        const newGlucoseValues = [...glucoseValues, Number(inputValue)];
+        const newTimestamps = [...timestamps, recordedTime];
+        const newGlucoseIds = [...glucoseIds, response.data.data.id];
+
+        // Call the helper function to sort the arrays
+        sortArrays(newTimes, newGlucoseValues, newTimestamps, newGlucoseIds);
 
         dispatch(
           addGlucoseValueSlice({
@@ -300,6 +318,10 @@ const GlucoseMonitorScreen = ({ navigation }) => {
         console.error("Failed to log glucose value:", error);
         console.error(error.message, error.config);
       });
+  };
+
+  const handleCancel = () => {
+    setIsDialogVisible(false);
   };
 
   const handleSubmit = async () => {
@@ -329,6 +351,12 @@ const GlucoseMonitorScreen = ({ navigation }) => {
       setGlucoseValues(newGlucoseValues);
       setTimestamps(newTimestamps);
       setTimes(newTimes);
+
+      toastRef.current.show("Glucose value updated successfully", {
+        type: "success",
+      });
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      scrollRef.current?.scrollTo({ y: 0, animated: true });
     }
   };
 
@@ -342,9 +370,17 @@ const GlucoseMonitorScreen = ({ navigation }) => {
       newGlucoseValues.splice(index, 1);
       newTimestamps.splice(index, 1);
       newGlucoseIds.splice(index, 1);
+
       setGlucoseValues(newGlucoseValues);
       setTimestamps(newTimestamps);
       setGlucoseIds(newGlucoseIds);
+      setButtonDisabled(false);
+
+      toastRef.current.show("Glucose value removed successfully", {
+        type: "success",
+      });
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      scrollRef.current?.scrollTo({ y: 0, animated: true });
     }
   };
 
@@ -359,10 +395,6 @@ const GlucoseMonitorScreen = ({ navigation }) => {
       .then((response) => {
         setGlucoseCount(response.data.data.glucoseValues.length);
         setLatestGlucoseValues(response.data.data.glucoseValues);
-        console.log(
-          "Fetched latest glucose values:",
-          response.data.data.glucoseValues
-        );
       })
       .catch((error) => {
         console.error("Failed to fetch all glucose values:", error);
@@ -412,48 +444,81 @@ const GlucoseMonitorScreen = ({ navigation }) => {
     }
   };
 
-  const convertToMmolPerMol = (A1cReading) => {
-    return (10.929 * (A1cReading - 2.15)).toFixed(2);
+  const convertToMgPerDl = (A1cReading) => {
+    return (28.7 * A1cReading - 46.7).toFixed(2);
   };
 
   const renderSheetContent = () => {
-    if (glucoseCount < 10) {
-      return (
-        <View>
-          <Text style={styles.a1cText}>
-            You need to log at least 10 values in the past week to estimate your
-            HbA1c.
-          </Text>
-          <Text style={styles.a1cText}>
-            You currently have {glucoseCount} / 10 values logged in the past
-            week.
-          </Text>
-        </View>
-      );
-    } else {
-      return (
-        <View>
-          <Text style={{ ...styles.a1cText, paddingBottom: 40 }}>
-            Please tap the button below to receive your estimated HbA1c
-          </Text>
-          <TouchableOpacity style={styles.a1cBtn} onPress={estimateA1c}>
-            <Text style={styles.a1cBtnText}>Estimate HbA1c</Text>
-          </TouchableOpacity>
-          {A1cReading !== 0 && (
-            <Text style={[getA1cReadingStyle(A1cReading), styles.a1cReading]}>
-              Your estimated HbA1c is {A1cReading}% (
-              {convertToMmolPerMol(A1cReading)} mmol/mol)
+    return (
+      <View>
+        <Text style={styles.title}>Estimate HbA1c</Text>
+        <Text style={styles.a1cText}>
+          This feature estimates your HbA1c level based on the glucose values
+          you have logged in the past week.
+        </Text>
+        {glucoseCount < 10 ? (
+          <View>
+            <Text style={styles.a1cText}>
+              You need to log at least 10 values in the past week to estimate
+              your HbA1c.
             </Text>
-          )}
-        </View>
-      );
-    }
+            <Text style={styles.a1cText}>
+              You currently have {glucoseCount} / 10 values logged in the past
+              week.
+            </Text>
+          </View>
+        ) : (
+          <View>
+            <Text style={{ ...styles.a1cText, paddingBottom: 40 }}>
+              Please tap the button below to receive your estimated HbA1c level
+            </Text>
+            <TouchableOpacity style={styles.a1cBtn} onPress={estimateA1c}>
+              <Text style={styles.a1cBtnText}>Estimate HbA1c</Text>
+            </TouchableOpacity>
+
+            {A1cReading !== 0 && (
+              <View style={styles.a1cPredictionContainer}>
+                <Text
+                  style={[getA1cReadingStyle(A1cReading), styles.a1cReading]}
+                >
+                  Your estimated HbA1c is {A1cReading}% (
+                  {convertToMgPerDl(A1cReading)} mg/dL)
+                </Text>
+
+                <TouchableOpacity
+                  style={styles.btnNext}
+                  onPress={() => {
+                    navigation.navigate("A1cResult", {
+                      A1cReading: A1cReading,
+                    });
+                    toggleSheet();
+                  }}
+                >
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Text style={styles.btnNextText}>What's Next</Text>
+                    <AntDesign
+                      name="right"
+                      size={20}
+                      color={colors.complementary}
+                      style={{ paddingLeft: 5 }}
+                    />
+                  </View>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+        )}
+      </View>
+    );
   };
 
   const estimateA1c = () => {
-    console.log(`${getNgrokUrl()}/api/pred/estimate-a1c/${user._id}`);
-    console.log("Form data: ", formData);
-    console.log("Token: ", token);
     axios
       .post(`${getNgrokUrl()}/api/pred/estimate-a1c/${user._id}`, formData, {
         headers: {
@@ -470,11 +535,51 @@ const GlucoseMonitorScreen = ({ navigation }) => {
             })
           );
         }
+
         setA1cReading(response.data.A1cValue);
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
+        if (response.data.A1cValue < 5.7) {
+          setRiskScore("Low Risk");
+        } else if (
+          response.data.A1cValue >= 5.7 &&
+          response.data.A1cValue <= 6.4
+        ) {
+          setRiskScore("Moderate Risk");
+        } else {
+          setRiskScore("High Risk");
+        }
       })
       .catch((error) => {
         console.error("Error:", error);
       });
+  };
+
+  useEffect(() => {
+    riskScore && saveRiskScore();
+  }, [riskScore]);
+
+  const saveRiskScore = async () => {
+    try {
+      const response = await axios.put(
+        `${getNgrokUrl()}/api/health/risk-score/${user._id}`,
+        {
+          riskScore: riskScore,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        console.log("Risk score saved successfully");
+      }
+    } catch (error) {
+      console.log("Error saving risk score", error);
+    }
   };
 
   return (
@@ -482,67 +587,92 @@ const GlucoseMonitorScreen = ({ navigation }) => {
       onPress={sheetVisible ? toggleSheet : Keyboard.dismiss}
     >
       <ScrollView
-        style={styles.mainContainer}
         contentContainerStyle={{ paddingBottom: 100 }}
+        ref={scrollRef}
       >
-        <ChartComponent
-          selectedDate={selectedDate}
-          onSwipeLeft={onSwipeLeft}
-          onSwipeRight={onSwipeRight}
-          isToday={isToday}
-          glucoseValues={glucoseValues.map(Number)}
-          timestamps={timestamps}
-          times={times}
-          animation={animation}
-        />
-
-        <TouchableOpacity onPress={toggleSheet}>
-          <View style={styles.labelBar}>
-            <Text style={styles.labelText}>Estimate HbA1c</Text>
-            <Text
+        <SafeAreaView style={styles.mainContainer}>
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => navigation.openDrawer()}>
+              <Ionicons name="ios-menu" size={35} color={colors.darkBlue} />
+            </TouchableOpacity>
+            <Image
+              source={require("../../assets/icons/DarkAppIcon.png")}
+              style={styles.logo}
+            />
+            <TouchableOpacity
               style={[
-                styles.labelText,
-                { fontSize: 14, marginLeft: "35%", marginTop: 2 },
+                styles.button,
+                {
+                  backgroundColor: buttonDisabled
+                    ? colors.disabled
+                    : colors.complementary,
+                },
               ]}
+              onPress={() => {
+                setIsDialogVisible(true);
+              }}
+              disabled={buttonDisabled}
             >
-              {glucoseCount} / 10
-            </Text>
-            <AntDesign name="right" size={18} color={colors.primary} />
+              <AntDesign name="plus" size={25} color="white" />
+            </TouchableOpacity>
           </View>
-          <ProgressBar
-            progress={glucoseCount / 10}
-            color={colors.inactive}
-            style={{
-              width: "90%",
-              height: 10,
-              alignSelf: "center",
-              backgroundColor: colors.active,
-              borderRadius: 5,
-              borderWidth: 1,
-              borderColor: colors.complementary,
-            }}
+
+          <ChartComponent
+            selectedDate={selectedDate}
+            onSwipeLeft={onSwipeLeft}
+            onSwipeRight={onSwipeRight}
+            isToday={isToday}
+            glucoseValues={glucoseValues.map(Number)}
+            timestamps={timestamps}
+            times={times}
+            animation={animation}
           />
-        </TouchableOpacity>
 
-        <Sheet visible={sheetVisible} onRequestClose={toggleSheet}>
-          {renderSheetContent()}
-        </Sheet>
+          <TouchableOpacity onPress={toggleSheet}>
+            <View style={styles.labelBar}>
+              <Text style={styles.labelText}>Estimate HbA1c</Text>
+              <Text
+                style={[
+                  styles.labelText,
+                  { fontSize: 14, marginLeft: "35%", marginTop: 2 },
+                ]}
+              >
+                {glucoseCount} / 10
+              </Text>
+              <AntDesign name="right" size={18} color={colors.white} />
+            </View>
+            <ProgressBar
+              progress={glucoseCount / 10}
+              color={colors.inactive}
+              style={styles.progressBar}
+            />
+          </TouchableOpacity>
 
-        <Animated.View
-          pointerEvents={sheetVisible ? "auto" : "none"}
-          style={[styles.overlay, { opacity: fadeAnim }]}
-        />
+          <Sheet
+            visible={sheetVisible}
+            onRequestClose={toggleSheet}
+            height="80%"
+          >
+            {renderSheetContent()}
+          </Sheet>
 
-        <View style={styles.container}>
-          <View style={styles.inputContainer}>
-            <TextInput
+          <Animated.View
+            pointerEvents={sheetVisible ? "auto" : "none"}
+            style={[styles.overlay, { opacity: fadeAnim }]}
+          />
+
+          <Dialog.Container visible={isDialogVisible}>
+            <Dialog.Title>Add Glucose Value</Dialog.Title>
+            <Dialog.Description>
+              Please enter the glucose value and time
+            </Dialog.Description>
+            <Dialog.Input
               placeholder="Enter glucose value"
               value={inputValue}
               onChangeText={(text) => setInputValue(text)}
-              style={styles.input}
               keyboardType="numeric"
               returnKeyType="done"
-              onSubmitEditing={handleSubmit}
+              autoFocus={true}
             />
 
             {Platform.OS === "android" && (
@@ -551,46 +681,52 @@ const GlucoseMonitorScreen = ({ navigation }) => {
               </View>
             )}
             {(showTimePicker || Platform.OS === "ios") && (
-              <DateTimePicker
-                testID="timePicker"
-                value={selectedTime}
-                mode={"time"}
-                is24Hour={true}
-                display="default"
-                onChange={onTimeChange}
-                paddingHorizontal={10}
-              />
+              <View style={styles.dialogContainer}>
+                <Text style={styles.dialogText}>Select time:</Text>
+                <DateTimePicker
+                  testID="timePicker"
+                  value={selectedTime}
+                  mode={"time"}
+                  is24Hour={true}
+                  display="default"
+                  onChange={onTimeChange}
+                  paddingHorizontal={10}
+                />
+              </View>
             )}
+            <Dialog.Button label="Cancel" onPress={handleCancel} />
+            <Dialog.Button
+              label="Submit"
+              onPress={() => {
+                handleSubmit();
+                setIsDialogVisible(false);
+              }}
+            />
+          </Dialog.Container>
+
+          <View style={styles.listComponent}>
+            <ListComponent
+              glucoseValues={glucoseValues}
+              timestamps={timestamps}
+              dates={dates}
+              times={times}
+              glucoseIds={glucoseIds}
+              selectedDate={selectedDate}
+              onUpdate={handleUpdate}
+              onRemove={handleRemove}
+            />
           </View>
 
-          <TouchableOpacity
-            style={[
-              styles.button,
-              {
-                backgroundColor: buttonDisabled
-                  ? colors.disabled
-                  : colors.primary,
-              },
-            ]}
-            onPress={handleSubmit}
-            disabled={buttonDisabled}
-          >
-            <Icon name="plus" size={15} color="white" />
-          </TouchableOpacity>
-        </View>
-
-        <View>
-          <ListComponent
-            glucoseValues={glucoseValues}
-            timestamps={timestamps}
-            dates={dates}
-            times={times}
-            glucoseIds={glucoseIds}
-            selectedDate={selectedDate}
-            onUpdate={handleUpdate}
-            onRemove={handleRemove}
+          <Toast
+            ref={toastRef}
+            placement="top"
+            style={{ backgroundColor: colors.darkBlue }}
+            fadeInDuration={750}
+            fadeOutDuration={1000}
+            opacity={1}
+            textStyle={{ color: colors.white, fontFamily: "MontserratRegular" }}
           />
-        </View>
+        </SafeAreaView>
       </ScrollView>
     </TouchableWithoutFeedback>
   );
@@ -598,7 +734,19 @@ const GlucoseMonitorScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   mainContainer: {
-    marginTop: 20,
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 20,
+    backgroundColor: colors.background,
+  },
+  logo: {
+    width: 50,
+    height: 50,
   },
   container: {
     justifyContent: "center",
@@ -613,19 +761,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     flex: 1,
   },
-  inputContainer: {
+  dialogContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "center",
     alignItems: "center",
-    width: "100%",
-    paddingVertical: 5,
-    marginBottom: 10,
+    marginBottom: 20,
+  },
+  dialogText: {
+    fontSize: 16,
+    color: colors.white,
   },
   button: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    margin: 20,
+    width: 40,
+    height: 40,
+    borderRadius: 40 / 2,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -654,11 +803,24 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     shadowOffset: { width: 0, height: 2 },
     elevation: 5,
-    backgroundColor: colors.active,
+    backgroundColor: colors.complementary,
   },
   labelText: {
     fontSize: 18,
     fontFamily: "MontserratRegular",
+    color: colors.white,
+  },
+  progressBar: {
+    width: "90%",
+    height: 10,
+    alignSelf: "center",
+    backgroundColor: colors.active,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: colors.complementary,
+  },
+  listComponent: {
+    marginVertical: 30,
   },
   overlay: {
     position: "absolute",
@@ -668,6 +830,13 @@ const styles = StyleSheet.create({
     bottom: 0,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     zIndex: 10,
+  },
+  title: {
+    fontSize: 20,
+    fontFamily: "MontserratBold",
+    textAlign: "center",
+    padding: 10,
+    marginBottom: 30,
   },
   a1cText: {
     fontSize: 18,
@@ -683,16 +852,23 @@ const styles = StyleSheet.create({
   },
   a1cBtn: {
     padding: 15,
-    backgroundColor: colors.primary,
+    backgroundColor: colors.complementary,
     borderRadius: 5,
     alignSelf: "center",
+  },
+  a1cPredictionContainer: {
+    marginTop: 30,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: colors.white,
+    padding: 20,
+    borderRadius: 5,
   },
   a1cReading: {
     fontSize: 18,
     fontFamily: "MontserratBold",
     textAlign: "center",
     padding: 10,
-    marginTop: 20,
   },
   a1cNormal: {
     color: colors.green,
@@ -702,6 +878,17 @@ const styles = StyleSheet.create({
   },
   a1cDiabetic: {
     color: colors.danger,
+  },
+  btnNext: {
+    padding: 15,
+    borderRadius: 5,
+    marginTop: 20,
+  },
+  btnNextText: {
+    fontSize: 18,
+    fontFamily: "MontserratRegular",
+    textAlign: "center",
+    color: colors.complementary,
   },
 });
 

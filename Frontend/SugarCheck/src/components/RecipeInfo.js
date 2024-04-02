@@ -81,7 +81,7 @@ const RecipeInfo = ({ route, navigation }) => {
 
   return (
     <SafeAreaView>
-      <ScrollView>
+      <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 100 }}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Icon name="left" size={25} color={colors.darkBlue} />
