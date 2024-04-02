@@ -119,19 +119,20 @@ const ChangePassword = ({ navigation }) => {
 
   return (
     <View style={styles.mainContainer}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="left" size={30} color={colors.darkBlue} />
-        </TouchableOpacity>
-        <Image
-          source={require("../../../assets/icons/DarkAppIcon.png")}
-          style={styles.logo}
-        />
-        <View style={{ width: 35 }} />
-      </View>
-
       <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 100 }}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Icon name="left" size={30} color={colors.darkBlue} />
+          </TouchableOpacity>
+          <Image
+            source={require("../../../assets/icons/DarkAppIcon.png")}
+            style={styles.logo}
+          />
+          <View style={{ width: 35 }} />
+        </View>
+
         <View style={styles.container}>
+          <Text style={styles.title}>Change Password</Text>
           <Text style={styles.label}>Current Password</Text>
           <TextInput
             value={currentPassword}
@@ -219,6 +220,13 @@ const styles = StyleSheet.create({
   logo: {
     width: 50,
     height: 50,
+  },
+  title: {
+    fontFamily: "MontserratBold",
+    fontSize: 24,
+    color: colors.darkBlue,
+    textAlign: "center",
+    marginBottom: 40,
   },
   label: {
     fontFamily: "MontserratRegular",

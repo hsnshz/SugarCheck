@@ -51,9 +51,9 @@ const ListComponent = ({
   const [selectedTime, setSelectedTime] = useState(new Date());
   const [showTimePicker, setShowTimePicker] = useState(false);
 
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(true);
   const [animation] = useState(new Animated.Value(0));
-  const [arrow, setArrow] = useState("down");
+  const [arrow, setArrow] = useState("up");
 
   const [isDialogVisible, setIsDialogVisible] = useState(false);
   const [inputText, setInputText] = useState("");
@@ -69,16 +69,6 @@ const ListComponent = ({
 
   useEffect(() => {
     toggleAnimation();
-
-    glucoseValues.map((value, index) => {
-      console.log("------------------------");
-      console.log("Glucose value: ", value);
-      console.log("Timestamp: ", timestamps[index]);
-      console.log("Glucose IDs: ", glucoseIds[index]);
-      console.log("Selected date: ", selectedDate);
-      console.log("Selected time: ", selectedTime);
-      console.log("Times: ", times[index]);
-    });
   }, [expanded]);
 
   const toggleAnimation = () => {
@@ -129,10 +119,6 @@ const ListComponent = ({
 
   const updateGlucoseValue = async (value, readingId) => {
     try {
-      console.log(
-        `${getNgrokUrl()}/api/log/update-glucose/${user._id}/${readingId}`
-      );
-
       // Create the new Date object
       const updatedTimestamp = new Date(
         selectedTime.getFullYear(),
@@ -169,7 +155,6 @@ const ListComponent = ({
             id: readingId,
           })
         );
-        console.log("Glucose value updated successfully");
       }
 
       swipeableRefs.current.forEach((ref) => ref && ref.close());
@@ -182,9 +167,6 @@ const ListComponent = ({
 
   const deleteGlucoseValue = async (readingId) => {
     try {
-      console.log(
-        `${getNgrokUrl()}/api/log/delete-glucose/${user._id}/${readingId}`
-      );
       const response = await axios.delete(
         `${getNgrokUrl()}/api/log/delete-glucose/${user._id}/${readingId}`,
         {
@@ -197,7 +179,6 @@ const ListComponent = ({
 
       if (response.status === 200) {
         onRemove(readingId);
-        console.log("Glucose value deleted successfully");
       }
     } catch (error) {
       console.error(error);
@@ -236,8 +217,6 @@ const ListComponent = ({
     );
 
     selectedDateObj.setHours(hours, minutes, 0);
-    console.log("------------------------");
-    console.log("Selected date object: ", selectedDateObjUTC);
 
     setCurrentReadingId(readingId);
     setCurrentValue(value);
@@ -297,8 +276,8 @@ const ListComponent = ({
           <Icon
             name={arrow}
             size={18}
-            color={colors.primary}
-            style={{ marginRight: 20 }}
+            color={colors.white}
+            style={{ marginRight: 10 }}
           />
         </View>
       </TouchableOpacity>
@@ -349,8 +328,6 @@ const ListComponent = ({
               onChange={(event, selectedDate) => {
                 setShowTimePicker(false);
                 const currentTime = selectedDate || new Date();
-                console.log("Current time: ", currentTime);
-                console.log("Selected time: ", selectedTime);
                 setSelectedTime(currentTime);
               }}
               style={{ alignSelf: "center", marginBottom: 20 }}
@@ -371,15 +348,16 @@ const styles = StyleSheet.create({
   labelBar: {
     flexDirection: "row",
     justifyContent: "space-between",
-    padding: 10,
+    padding: 15,
     borderRadius: 5,
     alignSelf: "center",
     width: "90%",
-    backgroundColor: "#FFB347",
+    backgroundColor: colors.complementary,
   },
   labelText: {
     fontSize: 18,
     fontFamily: "MontserratRegular",
+    color: colors.white,
   },
   listContainer: {
     overflow: "hidden",
@@ -409,7 +387,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
     borderRadius: 5,
     marginRight: 5,
-    backgroundColor: colors.primary,
+    backgroundColor: colors.complementary,
     width: screenWidth * 0.2,
   },
   swipeButton2: {
