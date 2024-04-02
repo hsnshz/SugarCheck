@@ -26,7 +26,7 @@ const __dirname = dirname(__filename);
 const serviceAccount = JSON.parse(
   fs.readFileSync(
     new URL(
-      "/Users/hassanshahzad/Desktop/Westminster/Year3/FinalYearProject/SugarCheck/secrets/sugarcheck-0-firebase-adminsdk-sirmc-444be3e09d.json",
+      "../../secrets/sugarcheck-0-firebase-adminsdk-sirmc-444be3e09d.json",
       import.meta.url
     ),
     "utf-8"

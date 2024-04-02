@@ -7,7 +7,6 @@ import {
   View,
   Dimensions,
   TouchableOpacity,
-  Alert,
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
@@ -256,7 +255,10 @@ const GlucoseMonitorScreen = ({ navigation }) => {
     const currentValues = valuesPerDay[dateString] || 0;
 
     if (currentValues >= 3) {
-      Alert.alert("You can only enter 3 glucose values per day.");
+      toastRef.current.show("You can only log 3 values per day", {
+        type: "danger",
+      });
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       return;
     }
 

@@ -55,23 +55,23 @@ const PersonalInformation = ({ navigation }) => {
 
   const validateInput = () => {
     if (!username) {
-      alert("Username is required");
+      toastRef.current.show("Username is required", { type: "danger" });
       return;
     }
 
     if (!email) {
-      alert("Email is required");
+      toastRef.current.show("Email is required", { type: "danger" });
       return;
     } else if (!/\S+@\S+\.\S+/.test(email)) {
-      alert("Email is not valid");
+      toastRef.current.show("Email is not valid", { type: "danger" });
       return;
     }
 
     if (!phoneNumber) {
-      alert("Phone number is required");
+      toastRef.current.show("Phone number is required", { type: "danger" });
       return;
     } else if (!/^\d+$/.test(phoneNumber)) {
-      alert("Phone number is not valid");
+      toastRef.current.show("Phone number is not valid", { type: "danger" });
       return;
     }
 
