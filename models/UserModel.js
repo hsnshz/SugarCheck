@@ -78,8 +78,8 @@ const userSchema = new Schema(
       riskAssessment: {
         type: [
           {
-            riskScore: { type: String, default: "low" },
-            predictionResult: { type: String, default: "negative" },
+            riskScore: { type: String, default: "" },
+            predictionResult: { type: String, default: "" },
             date: { type: Date, default: Date.now },
           },
         ],
