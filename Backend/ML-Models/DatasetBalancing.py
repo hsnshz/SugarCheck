@@ -1,10 +1,15 @@
 import pandas as pd
 import numpy as np
+import os
+
+# Get the absolute path of the directory where the script is located
+dir_path = os.path.dirname(os.path.realpath(__file__))
+
+# Change the current working directory to the directory where the script is located
+os.chdir(dir_path)
 
 # Load the original dataset
-df = pd.read_csv(
-    "/Users/hassanshahzad/Desktop/Westminster/Year3/FinalYearProject/SugarCheck/Dataset/diabetes_data_upload.csv"
-)
+df = pd.read_csv("../../Dataset/diabetes_data_upload.csv")
 
 # Determine the current counts for each gender and class combination
 current_counts = df.groupby(["Gender", "class"]).size().reset_index(name="counts")
@@ -76,7 +81,7 @@ else:
 
 # Save the balanced dataset to a new CSV file
 balanced_df.to_csv(
-    "/Users/hassanshahzad/Desktop/Westminster/Year3/FinalYearProject/SugarCheck/Dataset/balanced_diabetes_data.csv",
+    "../../Dataset/balanced_diabetes_data.csv",
     index=False,
 )
 

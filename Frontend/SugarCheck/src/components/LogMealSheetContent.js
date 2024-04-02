@@ -9,7 +9,6 @@ import {
   Keyboard,
   TouchableOpacity,
   ScrollView,
-  Alert,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import colors from "../../config/colors";

@@ -1,16 +1,23 @@
 import pandas as pd
 import numpy as np
 from sklearn.feature_selection import SelectKBest, f_classif
-from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_squared_error, mean_absolute_error
 from sklearn.model_selection import train_test_split, KFold
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from keras.models import Sequential
 from keras.layers import Dense, SimpleRNN
 import pickle
 import unittest
+import os
+
+# Get the absolute path of the directory where the script is located
+dir_path = os.path.dirname(os.path.realpath(__file__))
+
+# Change the current working directory to the directory where the script is located
+os.chdir(dir_path)
 
 # Load the data
-df = pd.read_csv("Dataset/dummy_diabetes_data.csv")
+df = pd.read_csv("../../../Dataset/dummy_diabetes_data.csv")
 
 # Convert 'Gender' to one-hot encoding
 df = pd.get_dummies(df, columns=["Gender"])
@@ -110,12 +117,16 @@ for train_index, test_index in kfold.split(X):
 
     # Predict and evaluate the model on the training set
     y_train_pred = model.predict(X_train)
+    train_mae = mean_absolute_error(y_train, y_train_pred)
+    train_scores.append(train_mae)
     train_mse = mean_squared_error(y_train, y_train_pred)
     train_rmse = train_mse**0.5
     train_scores.append(train_rmse)
 
     # Predict and evaluate the model on the test set
     y_test_pred = model.predict(X_test)
+    test_mae = mean_absolute_error(y_test, y_test_pred)
+    test_scores.append(test_mae)
     test_mse = mean_squared_error(y_test, y_test_pred)
     test_rmse = test_mse**0.5
     test_scores.append(test_rmse)
@@ -127,6 +138,7 @@ mse = mean_squared_error(y_test, y_pred)
 rmse = mse**0.5
 scores.append(rmse)
 
+
 print()
 print("Model performance:")
 print("--------------------------------------------------")
@@ -135,6 +147,10 @@ print()
 # Print the mean RMSE across all folds for the training and test sets
 print(f"Training RMSE: {np.mean(train_scores)}")
 print(f"Test RMSE: {np.mean(test_scores)}")
+
+# After the cross-validation loop, print the mean MAE across all folds for the training and test sets
+print(f"Training MAE: {np.mean(train_scores)}")
+print(f"Test MAE: {np.mean(test_scores)}")
 
 # Print the mean RMSE across all folds
 print(f"Cross-validated RMSE: {np.mean(scores)}")
@@ -147,20 +163,18 @@ max_value = y_train.max()
 print(f"Range of target variable: {min_value} to {max_value}")
 
 # Save the model
-model.save(
-    "/Users/hassanshahzad/Desktop/Westminster/Year3/FinalYearProject/SugarCheck/ModelFiles/saved_model.pb"
-)
+model.save("../Models/saved_model.pb")
 
 # Save the scaler
 with open(
-    "/Users/hassanshahzad/Desktop/Westminster/Year3/FinalYearProject/SugarCheck/ModelFiles/scaler.pkl",
+    "../Models/scaler.pkl",
     "wb",
 ) as file:
     pickle.dump(scaler, file)
 
 # Save the selector
 with open(
-    "/Users/hassanshahzad/Desktop/Westminster/Year3/FinalYearProject/SugarCheck/ModelFiles/selector.pkl",
+    "../Models/selector.pkl",
     "wb",
 ) as file:
     pickle.dump(selector, file)

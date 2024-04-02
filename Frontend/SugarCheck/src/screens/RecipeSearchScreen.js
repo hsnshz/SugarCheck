@@ -10,7 +10,6 @@ import {
   ScrollView,
   Animated,
   SectionList,
-  Alert,
   ActivityIndicator,
   RefreshControl,
 } from "react-native";
@@ -25,6 +24,7 @@ import Sheet from "../components/Sheet";
 import RecipeCardComponent from "../components/RecipeCardComponent";
 import RecipeGridComponent from "../components/RecipeGridComponent";
 import * as Haptics from "expo-haptics";
+import Toast from "react-native-fast-toast";
 
 const RecipeSearchScreen = () => {
   const items = [
@@ -169,6 +169,8 @@ const RecipeSearchScreen = () => {
   const [expanded, setExpanded] = useState(false);
   const [arrow, setArrow] = useState("down");
 
+  const toastRef = useRef(null);
+
   function toCamelCase(str) {
     return str
       .split(" ")
@@ -224,7 +226,10 @@ const RecipeSearchScreen = () => {
       }
     } catch (error) {
       console.error("Error fetching recipes:", error);
-      Alert.alert("Error", "An error occurred while fetching recipes");
+      toastRef.current.show("Error fetching recipes", {
+        type: "danger",
+      });
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     }
   };
 
@@ -564,6 +569,16 @@ const RecipeSearchScreen = () => {
             )}
           </View>
         ) : null}
+
+        <Toast
+          ref={toastRef}
+          placement="top"
+          style={{ backgroundColor: colors.darkBlue }}
+          fadeInDuration={750}
+          fadeOutDuration={1000}
+          opacity={1}
+          textStyle={{ color: colors.white, fontFamily: "MontserratRegular" }}
+        />
       </ScrollView>
     </View>
   );
