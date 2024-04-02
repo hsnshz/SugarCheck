@@ -1,4 +1,4 @@
-import React, { useState, createRef } from "react";
+import React, { useState, createRef, useRef } from "react";
 import {
   Button,
   Image,
@@ -10,7 +10,6 @@ import {
   Keyboard,
   Text,
   TouchableOpacity,
-  Alert,
 } from "react-native";
 import axios from "axios";
 import { getNgrokUrl } from "../../config/constants";
@@ -18,11 +17,14 @@ import { CommonActions } from "@react-navigation/native";
 import { useSelector } from "react-redux";
 import colors from "../../config/colors";
 import Icon from "react-native-vector-icons/AntDesign";
+import Toast from "react-native-fast-toast";
 
 const EmailVerificationScreen = ({ navigation }) => {
   const user = useSelector((state) => state.user.user) || {};
   const email = user ? user.email : "";
   const [code, setCode] = useState(Array(6).fill(""));
+
+  const toastRef = useRef(null);
 
   const inputRefs = Array(6)
     .fill()
@@ -41,7 +43,9 @@ const EmailVerificationScreen = ({ navigation }) => {
       const data = response.data;
 
       if (data.message === "Email verified successfully") {
-        Alert.alert("Success", "Account created successfully");
+        toastRef.current.show("Email verified successfully", {
+          type: "success",
+        });
 
         navigation.dispatch(
           CommonActions.reset({
@@ -54,10 +58,9 @@ const EmailVerificationScreen = ({ navigation }) => {
           })
         );
       } else {
-        console.log("Email verification failed");
-        Alert.alert("Email verification failed", "Please try again", [
-          { text: "OK" },
-        ]);
+        toastRef.current.show("Invalid verification code", {
+          type: "danger",
+        });
       }
     } catch (error) {
       console.log("Error verifying email");
@@ -110,6 +113,16 @@ const EmailVerificationScreen = ({ navigation }) => {
             <Text style={styles.btnText}>Verify Email</Text>
           </TouchableOpacity>
         </SafeAreaView>
+
+        <Toast
+          ref={toastRef}
+          placement="top"
+          style={{ backgroundColor: colors.darkBlue }}
+          fadeInDuration={750}
+          fadeOutDuration={1000}
+          opacity={1}
+          textStyle={{ color: colors.white, fontFamily: "MontserratRegular" }}
+        />
       </View>
     </TouchableWithoutFeedback>
   );

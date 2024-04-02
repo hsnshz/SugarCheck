@@ -17,10 +17,8 @@ const FOOD_DB_APP_KEY = "1807e5f921df87a5a96ee3cc5619ed7f";
 const EXERCISE_API = "bbxICjNOAOt7wUrm/s4dbw==va4f46OzsDKi15Zz";
 
 const getConstants = () => {
-  // Check if the app is running in development or production mode
   const isDev = __DEV__;
 
-  // Return the appropriate API URL based on the environment
   const API_URL = isDev ? DEV_API_URL : PROD_API_URL;
 
   return {

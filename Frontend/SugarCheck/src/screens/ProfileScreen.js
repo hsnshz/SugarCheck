@@ -1,17 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
-import { setHeaderOptions } from "../components/HeaderOptions";
 import Icon from "react-native-vector-icons/FontAwesome";
 import colors from "../../config/colors";
 import { useDispatch } from "react-redux";
-import { Alert } from "react-native";
-import { CommonActions } from "@react-navigation/native";
-import { persistor } from "../store/store";
-import { signOut } from "../store/slices/authSlice";
-import * as SecureStore from "expo-secure-store";
 import { useNavigation } from "@react-navigation/native";
 import { ScrollView } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { getNgrokUrl } from "../../config/constants";
 import { useSelector } from "react-redux";
@@ -53,34 +46,6 @@ const ProfileScreen = () => {
       setProfilePicture(null);
     }
   }, [user.profilePicture]);
-
-  const handleSignOut = async () => {
-    try {
-      // Remove the token from AsyncStorage
-      await AsyncStorage.removeItem("@token");
-
-      await SecureStore.deleteItemAsync("userToken");
-      dispatch(signOut());
-      await persistor.purge();
-
-      navigation.dispatch(
-        CommonActions.reset({
-          index: 0,
-          routes: [
-            {
-              name: "Welcome",
-            },
-          ],
-        })
-      );
-    } catch (error) {
-      console.error("Error during sign out: ", error);
-      Alert.alert(
-        "Error",
-        "An error occurred during sign out. Please try again."
-      );
-    }
-  };
 
   return (
     <ScrollView>
@@ -151,32 +116,6 @@ const ProfileScreen = () => {
             }
           />
         </View>
-
-        {/* <View style={styles.section}>
-          <SettingsItem
-            textStyle={styles.delete}
-            title="Log Out"
-            iconName="sign-out"
-            onPress={() =>
-              Alert.alert(
-                "Sign Out",
-                "Are you sure you want to sign out?",
-                [
-                  {
-                    text: "Yes",
-                    onPress: handleSignOut,
-                    style: "destructive",
-                  },
-                  {
-                    text: "Cancel",
-                    style: "cancel",
-                  },
-                ],
-                { cancelable: false }
-              )
-            }
-          />
-        </View> */}
 
         <View style={styles.section}>
           <SettingsItem

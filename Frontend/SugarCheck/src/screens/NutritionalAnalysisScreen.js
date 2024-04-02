@@ -50,7 +50,6 @@ const NutritionalAnalysisScreen = () => {
         console.error("Response headers:", error.response.headers);
       }
 
-      alert("An error occurred while fetching the nutrition information.");
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       setIsLoading(false);
     }

@@ -13,11 +13,16 @@ from sklearn.metrics import (
     recall_score,
     roc_auc_score,
 )
+import os
+
+# Get the absolute path of the directory where the script is located
+dir_path = os.path.dirname(os.path.realpath(__file__))
+
+# Change the current working directory to the directory where the script is located
+os.chdir(dir_path)
 
 # Load dataset
-df = pd.read_csv(
-    "/Users/hassanshahzad/Desktop/Westminster/Year3/FinalYearProject/SugarCheck/Dataset/balanced_diabetes_data.csv"
-)
+df = pd.read_csv("../../Dataset/balanced_diabetes_data.csv")
 df.columns = map(str.lower, df.columns)
 df["class"] = df["class"].replace({"Positive": 1, "Negative": 0})
 
@@ -104,21 +109,21 @@ saved_model = pickle.dumps(final_rf)
 
 # Save the model to disk
 with open(
-    "/Users/hassanshahzad/Desktop/Westminster/Year3/FinalYearProject/SugarCheck/ModelFiles/model.pkl",
+    "Models/model.pkl",
     "wb",
 ) as file:
     pickle.dump(final_rf, file)
 
 # Save encoders to disk
 with open(
-    "/Users/hassanshahzad/Desktop/Westminster/Year3/FinalYearProject/SugarCheck/ModelFiles/encoders.pkl",
+    "Models/encoders.pkl",
     "wb",
 ) as file:
     pickle.dump(encoders, file)
 
 # Save MinMaxScaler to disk
 with open(
-    "/Users/hassanshahzad/Desktop/Westminster/Year3/FinalYearProject/SugarCheck/ModelFiles/minmax.pkl",
+    "Models/minmax.pkl",
     "wb",
 ) as file:
     pickle.dump(minmax, file)

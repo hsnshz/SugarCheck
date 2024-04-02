@@ -1,4 +1,4 @@
-import React, { createRef, useState } from "react";
+import React, { createRef, useState, useRef } from "react";
 import {
   View,
   Text,
@@ -7,7 +7,6 @@ import {
   StyleSheet,
   ScrollView,
   Image,
-  Alert,
   Keyboard,
 } from "react-native";
 import colors from "../../../config/colors";
@@ -21,6 +20,7 @@ import { persistor } from "../../store/store";
 import { signOut } from "../../store/slices/authSlice";
 import { CommonActions } from "@react-navigation/native";
 import * as Haptics from "expo-haptics";
+import Toast from "react-native-fast-toast";
 
 const ResetPassword = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -31,6 +31,7 @@ const ResetPassword = ({ navigation }) => {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const [errorMessage, setErrorMessage] = useState("");
+  const toastRef = useRef(null);
 
   const [steps, setSteps] = useState(1);
   const inputRefs = Array(6)
@@ -168,10 +169,9 @@ const ResetPassword = ({ navigation }) => {
       );
     } catch (error) {
       console.error("Error during sign out: ", error);
-      Alert.alert(
-        "Error",
-        "An error occurred during sign out. Please try again."
-      );
+      toastRef.current.show("Error signing out", {
+        type: "danger",
+      });
     }
   };
 
@@ -272,6 +272,16 @@ const ResetPassword = ({ navigation }) => {
             </TouchableOpacity>
           </View>
         )}
+
+        <Toast
+          ref={toastRef}
+          placement="top"
+          style={{ backgroundColor: colors.darkBlue, marginTop: 50 }}
+          fadeInDuration={750}
+          fadeOutDuration={1000}
+          opacity={1}
+          textStyle={{ color: colors.white, fontFamily: "MontserratRegular" }}
+        />
       </ScrollView>
     </View>
   );

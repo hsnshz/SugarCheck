@@ -1,12 +1,10 @@
-import React, { useCallback } from "react";
-import { useState, useEffect } from "react";
+import React, { useCallback, useRef, useState, useEffect } from "react";
 import {
   View,
   TextInput,
   TouchableOpacity,
   Image,
   StyleSheet,
-  Alert,
   Platform,
   Button,
   Text,
@@ -28,6 +26,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Icon from "react-native-vector-icons/AntDesign";
 import moment from "moment";
 import * as Haptics from "expo-haptics";
+import Toast from "react-native-fast-toast";
 import * as Notifications from "expo-notifications";
 
 const SignUpScreen = ({ navigation }) => {
@@ -48,6 +47,8 @@ const SignUpScreen = ({ navigation }) => {
   const [errorMessage, setErrorMessage] = useState("");
 
   const [moveAnimation] = useState(new Animated.Value(0));
+
+  const toastRef = useRef(null);
 
   const keyboardDidShow = useCallback(() => {
     Animated.timing(moveAnimation, {
@@ -246,7 +247,9 @@ const SignUpScreen = ({ navigation }) => {
         // );
       } catch (error) {
         console.error(error);
-        Alert.alert("Error", "There was an error creating your account");
+        toastRef.current.show("An error occurred. Please try again", {
+          type: "danger",
+        });
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       }
     }
@@ -333,7 +336,12 @@ const SignUpScreen = ({ navigation }) => {
                   if (value !== null) {
                     setGender(value);
                   } else {
-                    Alert.alert("Invalid selection", "Please choose a gender");
+                    toastRef.current.show("Please select an option", {
+                      type: "danger",
+                    });
+                    Haptics.notificationAsync(
+                      Haptics.NotificationFeedbackType.Error
+                    );
                   }
                 }}
                 items={[
@@ -447,6 +455,16 @@ const SignUpScreen = ({ navigation }) => {
               </TouchableOpacity>
             </>
           )}
+
+          <Toast
+            ref={toastRef}
+            placement="top"
+            style={{ backgroundColor: colors.darkBlue, marginTop: 50 }}
+            fadeInDuration={750}
+            fadeOutDuration={1000}
+            opacity={1}
+            textStyle={{ color: colors.white, fontFamily: "MontserratRegular" }}
+          />
         </KeyboardAvoidingView>
       </View>
     </TouchableWithoutFeedback>
