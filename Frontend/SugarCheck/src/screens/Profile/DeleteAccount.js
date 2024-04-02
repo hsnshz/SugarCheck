@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   View,
   ScrollView,
@@ -18,11 +18,14 @@ import { CommonActions } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
 import Icon from "react-native-vector-icons/AntDesign";
+import Toast from "react-native-fast-toast";
 
 const DeleteAccount = ({ navigation }) => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user.user) || {};
   const token = useSelector((state) => state.auth.token) || "";
+
+  const toastRef = useRef(null);
 
   const handleDeleteAccount = async () => {
     try {
@@ -55,10 +58,9 @@ const DeleteAccount = ({ navigation }) => {
       }
     } catch (error) {
       console.error("Error during account deletion: ", error);
-      Alert.alert(
-        "Error",
-        "An error occurred during account deletion. Please try again."
-      );
+      toastRef.current.show("Error deleting account", {
+        type: "danger",
+      });
     }
   };
 
@@ -118,6 +120,16 @@ const DeleteAccount = ({ navigation }) => {
             <Text style={styles.btnDeleteText}>Delete Account</Text>
           </TouchableOpacity>
         </View>
+
+        <Toast
+          ref={toastRef}
+          placement="top"
+          style={{ backgroundColor: colors.darkBlue, marginTop: 50 }}
+          fadeInDuration={750}
+          fadeOutDuration={1000}
+          opacity={1}
+          textStyle={{ color: colors.white, fontFamily: "MontserratRegular" }}
+        />
       </ScrollView>
     </View>
   );
@@ -144,13 +156,6 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
   },
-  // subContainer: {
-  //   backgroundColor: colors.white,
-  //   borderWidth: 1,
-  //   borderColor: colors.gray,
-  //   borderRadius: 10,
-  //   padding: 20,
-  // },
   textContainer: {
     margin: 20,
     marginBottom: 20,

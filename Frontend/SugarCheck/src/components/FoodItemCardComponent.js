@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   Platform,
   Keyboard,
-  Alert,
 } from "react-native";
 import { Card } from "react-native-elements";
 import colors from "../../config/colors";
