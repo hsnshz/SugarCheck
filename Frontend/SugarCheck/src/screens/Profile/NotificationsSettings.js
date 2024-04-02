@@ -136,6 +136,8 @@ const NotificationsSettings = ({ navigation }) => {
         return;
       }
 
+      await Notifications.cancelAllScheduledNotificationsAsync();
+
       if (user?.userSettings?.glucoseReminders?.enabled) {
         glucoseRemindersTimes.forEach((time, index) => {
           Notifications.scheduleNotificationAsync({

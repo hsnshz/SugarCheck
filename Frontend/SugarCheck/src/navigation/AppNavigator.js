@@ -43,6 +43,8 @@ import ResourcesScreen from "../screens/ResourcesScreen";
 import ResourceViewerScreen from "../screens/ResourceViewerScreen";
 import NotificationsSettings from "../screens/Profile/NotificationsSettings";
 import TermsConditions from "../screens/Profile/TermsConditions";
+import A1cResultComponent from "../components/A1cResultComponent";
+import GetStartedScreen from "../screens/GetStartedScreen";
 
 const Stack = createStackNavigator();
 
@@ -96,6 +98,11 @@ export function RootStackNavigator() {
         options={{
           headerShown: false,
         }}
+      />
+      <Stack.Screen
+        name="GetStarted"
+        component={GetStartedScreen}
+        options={{ headerShown: false }}
       />
     </Stack.Navigator>
   );
@@ -285,6 +292,29 @@ export function ResourcesStackNavigator() {
   );
 }
 
+const GlucoseMonitorStack = createStackNavigator();
+
+export function GlucoseMonitorStackNavigator() {
+  return (
+    <GlucoseMonitorStack.Navigator>
+      <GlucoseMonitorStack.Screen
+        name="GlucoseMonitorScreen"
+        component={GlucoseMonitorScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <GlucoseMonitorStack.Screen
+        name="A1cResult"
+        component={A1cResultComponent}
+        options={{
+          headerShown: false,
+        }}
+      />
+    </GlucoseMonitorStack.Navigator>
+  );
+}
+
 const Drawer = createDrawerNavigator();
 
 export function DrawerNavigator() {
@@ -328,10 +358,9 @@ export function DrawerNavigator() {
       />
       <Drawer.Screen
         name="Glucose Monitor"
-        component={GlucoseMonitorScreen}
+        component={GlucoseMonitorStackNavigator}
         options={{
-          headerLeft: null,
-          headerTitle: "Glucose Logging",
+          headerShown: false,
           drawerIcon: ({ color, size }) => (
             <Ionicons name="ios-pulse" color={color} size={size} />
           ),
