@@ -4,14 +4,7 @@ import pickle
 import pandas as pd
 import numpy as np
 from keras.models import load_model
-import os
 from sklearn.base import BaseEstimator, TransformerMixin
-
-# Define the path to the dataset
-dir_path = os.path.dirname(os.path.realpath(__file__))
-
-# Change the working directory to the current file's directory
-os.chdir(dir_path)
 
 app = Flask(__name__)
 CORS(app)
