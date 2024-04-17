@@ -12,6 +12,7 @@ from sklearn.metrics import (
     precision_score,
     recall_score,
     roc_auc_score,
+    mean_squared_error,
 )
 import os
 
@@ -74,6 +75,7 @@ rf_roc = roc_auc_score(y_test, y_pred_rf)
 rf_prec = precision_score(y_test, y_pred_rf)
 rf_rec = recall_score(y_test, y_pred_rf)
 rf_f1 = f1_score(y_test, y_pred_rf)
+rf_mse = mean_squared_error(y_test, y_pred_rf)
 
 print("Evaluation Metrics for Final Random Forest Classifier:")
 print("Accuracy:", rf_acc)
@@ -81,6 +83,7 @@ print("ROC:", rf_roc)
 print("Precision:", rf_prec)
 print("Recall:", rf_rec)
 print("F1 Score:", rf_f1)
+print("Mean Squared Error:", rf_mse)
 print("\n")
 
 
