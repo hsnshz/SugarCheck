@@ -1,7 +1,8 @@
 import { User } from "../models/UserModel.js";
 import axios from "axios";
 
-const FLASK_API = process.env.FLASK_URL;
+// const FLASK_API = process.env.FLASK_URL;
+const FLASK_API = "http://10.100.136.182:3000";
 
 export async function predictDiabetes(req, res) {
   try {
@@ -61,7 +62,17 @@ export async function predictDiabetes(req, res) {
 
 export async function estimateA1c(req, res) {
   try {
-    let data = req.body;
+    let readings = req.body.timestamps.map((timestamp, index) => {
+      return {
+        timestamp: timestamp,
+        blood_glucose: req.body.glucose_values[index],
+        patient_id: 1,
+      };
+    });
+
+    let data = {
+      readings,
+    };
 
     // Check if the authenticated user is the same as the user to be updated
     if (req.user.userId !== req.params.id) {
@@ -79,7 +90,7 @@ export async function estimateA1c(req, res) {
       return res.status(404).send({ error: "User not found" });
     }
 
-    const A1cValue = parseFloat(response.data[0].toFixed(2));
+    const A1cValue = parseFloat(response.data["HbA1c"].toFixed(2));
     console.log("A1c Value Response: ", A1cValue);
 
     user.healthProfile.A1cReadings.push({

@@ -4,6 +4,14 @@ import pickle
 import pandas as pd
 import numpy as np
 from keras.models import load_model
+import os
+from sklearn.base import BaseEstimator, TransformerMixin
+
+# Define the path to the dataset
+dir_path = os.path.dirname(os.path.realpath(__file__))
+
+# Change the working directory to the current file's directory
+os.chdir(dir_path)
 
 app = Flask(__name__)
 CORS(app)
@@ -22,12 +30,6 @@ with open("encoders.pkl", "rb") as file:
     encoders = pickle.load(file)
 with open("minmax.pkl", "rb") as file:
     minmax = pickle.load(file)
-# Load the a1c model, scaler, and selector
-a1c_model = load_model("a1c_model.keras")
-with open("scaler.pkl", "rb") as f:
-    scaler = pickle.load(f)
-with open("selector.pkl", "rb") as f:
-    selector = pickle.load(f)
 
 
 @app.route("/predict", methods=["POST"])
@@ -62,60 +64,107 @@ def predict():
     return jsonify(prediction.tolist())
 
 
+class GlucoseDataPreprocessor(BaseEstimator, TransformerMixin):
+    def __init__(self, window=21):
+        self.window = (
+            window // 3
+        )  # Calculate rolling windows based on 3 readings per day
+
+    def fit(self, X, y=None):
+        return self  # Fitting does nothing as no parameters to learn for preprocessing
+
+    def transform(self, data):
+        data["Timestamp"] = pd.to_datetime(data["Timestamp"])
+        data["Date"] = data["Timestamp"].dt.date
+        grouped = data.groupby(["Patient_ID", "Date"])
+        daily_data = (
+            grouped["Blood_Glucose"]
+            .agg(["mean", "median", "std", "max", "min"])
+            .reset_index()
+        )
+        daily_data["HbA1c"] = grouped["HbA1c"].first().values
+
+        # Rolling features calculated for each glucose statistic
+        for feature in ["mean", "median", "std", "max", "min"]:
+            daily_data[f"{feature}_rolling_mean"] = daily_data.groupby("Patient_ID")[
+                feature
+            ].transform(lambda x: x.rolling(self.window, min_periods=1).mean())
+            daily_data[f"{feature}_rolling_std"] = daily_data.groupby("Patient_ID")[
+                feature
+            ].transform(lambda x: x.rolling(self.window, min_periods=1).std())
+
+        # Calculate summary statistics
+        daily_data["rolling_mean"] = daily_data[
+            [
+                f"{feature}_rolling_mean"
+                for feature in ["mean", "median", "std", "max", "min"]
+            ]
+        ].mean(axis=1)
+        daily_data["rolling_median"] = daily_data[
+            [
+                f"{feature}_rolling_mean"
+                for feature in ["mean", "median", "std", "max", "min"]
+            ]
+        ].median(axis=1)
+        daily_data["rolling_std"] = daily_data[
+            [
+                f"{feature}_rolling_std"
+                for feature in ["mean", "median", "std", "max", "min"]
+            ]
+        ].std(axis=1)
+
+        return daily_data.dropna()[
+            ["rolling_mean", "rolling_median", "rolling_std", "HbA1c"]
+        ]
+
+
+# Load the a1c model, and preprocessor
+with open("A1cModel.pkl", "rb") as file:
+    model_data = pickle.load(file)
+
+a1c_model = model_data["model"]
+preprocessor = model_data["preprocessor"]
+
+
 @app.route("/estimate-a1c", methods=["POST"])
 def estimate_a1c():
-    # Get the data from the POST request
-    data = request.get_json(force=True)
+    try:
+        data = request.get_json(force=True)
+        readings = data.get("readings", [])
+        input_data = pd.DataFrame(readings)
 
-    # Create a DataFrame from the data
-    input_data = pd.DataFrame(
-        {
-            "Age": [data["age"]],
-            "BMI": [data["bmi"]],
-            "Gender_Female": [data["gender_female"]],
-            "Gender_Male": [data["gender_male"]],
-        }
-    )
+        # Assign a default 'Patient_ID', 'Blood_Glucose' and 'HbA1c'
+        input_data["Patient_ID"] = "default"
+        input_data["Blood_Glucose"] = input_data.get("blood_glucose", 0)
+        input_data["HbA1c"] = input_data.get("HbA1c", 0)
 
-    # Add glucose values
-    for i, glucose_value in enumerate(data["glucose_values"]):
-        input_data[f"glucose_t-{9-i}"] = glucose_value
+        # Convert 'timestamp' to datetime
+        input_data["Timestamp"] = pd.to_datetime(input_data["timestamp"])
 
-    # Reorder the columns to match the order used when fitting the selector
-    input_data = input_data[
-        [
-            "glucose_t-9",
-            "glucose_t-8",
-            "glucose_t-7",
-            "glucose_t-6",
-            "glucose_t-5",
-            "glucose_t-4",
-            "glucose_t-3",
-            "glucose_t-2",
-            "glucose_t-1",
-            "glucose_t-0",
-            "Age",
-            "BMI",
-            "Gender_Female",
-            "Gender_Male",
-        ]
-    ]
+        # Check for required columns
+        expected_cols = {"Patient_ID", "Timestamp", "Blood_Glucose", "HbA1c"}
+        if not expected_cols.issubset(set(input_data.columns)):
+            return (
+                jsonify(
+                    {"error": f"Missing columns, required columns are: {expected_cols}"}
+                ),
+                400,
+            )
 
-    # Apply feature selection
-    input_data = selector.transform(input_data)
+        # Preprocess the data
+        processed_data = preprocessor.transform(input_data)
 
-    # Scale the glucose values
-    input_data = scaler.transform(input_data)
+        # Make a prediction
+        prediction = a1c_model.predict(
+            processed_data[["rolling_mean", "rolling_median", "rolling_std"]]
+        )
 
-    # Reshape the data to be 3D (samples, timesteps, features)
-    input_data = input_data.reshape((input_data.shape[0], input_data.shape[1], 1))
+        # Calculate the mean of the predictions
+        average_prediction = np.mean(prediction)
 
-    # Use the model to make a prediction
-    prediction = a1c_model.predict(input_data)
-
-    # Return the prediction
-    print(prediction[0].tolist())
-    return jsonify(prediction[0].tolist())
+        return jsonify({"HbA1c": average_prediction})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 if __name__ == "__main__":
