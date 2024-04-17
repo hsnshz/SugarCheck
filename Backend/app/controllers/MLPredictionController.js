@@ -1,8 +1,7 @@
 import { User } from "../models/UserModel.js";
 import axios from "axios";
 
-// const FLASK_API = process.env.FLASK_URL;
-const FLASK_API = "http://10.100.136.182:3000";
+const FLASK_API = process.env.FLASK_URL;
 
 export async function predictDiabetes(req, res) {
   try {
