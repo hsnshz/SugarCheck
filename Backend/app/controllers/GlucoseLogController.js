@@ -182,7 +182,7 @@ export async function fetchLatestValues(req, res) {
 
     const latestGlucoseReadings = pastWeekGlucoseReadings
       .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-      .slice(0, 10);
+      .slice(0, 21);
 
     const glucoseValues = latestGlucoseReadings.map(
       (reading) => reading.glucoseValue

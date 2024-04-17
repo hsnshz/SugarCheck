@@ -61,6 +61,7 @@ const GlucoseMonitorScreen = ({ navigation }) => {
   const [inputValue, setInputValue] = useState("");
   const [glucoseCount, setGlucoseCount] = useState(0);
   const [latestGlucoseValues, setLatestGlucoseValues] = useState([]);
+  const [latestTimestamps, setLatestTimestamps] = useState([]);
 
   const [sheetVisible, setSheetVisible] = useState(false);
   const [isDialogVisible, setIsDialogVisible] = useState(false);
@@ -83,10 +84,8 @@ const GlucoseMonitorScreen = ({ navigation }) => {
   const [A1cReading, setA1cReading] = useState(0);
 
   const [formData, setFormData] = useState({
-    age: age,
-    bmi: bmi,
-    gender_female: gender_female,
-    gender_male: gender_male,
+    patient_id: 1,
+    timestamps: latestTimestamps,
     glucose_values: latestGlucoseValues,
   });
 
@@ -105,11 +104,9 @@ const GlucoseMonitorScreen = ({ navigation }) => {
     gender === "male" ? (gender_male = 1) : (gender_female = 1);
 
     const updatedFormData = {
-      age: age,
-      bmi: bmi,
+      patient_id: 1,
+      timestamps: latestTimestamps,
       glucose_values: latestGlucoseValues,
-      gender_male,
-      gender_female,
     };
 
     setFormData(updatedFormData);
@@ -397,6 +394,7 @@ const GlucoseMonitorScreen = ({ navigation }) => {
       .then((response) => {
         setGlucoseCount(response.data.data.glucoseValues.length);
         setLatestGlucoseValues(response.data.data.glucoseValues);
+        setLatestTimestamps(response.data.data.timestamps);
       })
       .catch((error) => {
         console.error("Failed to fetch all glucose values:", error);
@@ -458,14 +456,14 @@ const GlucoseMonitorScreen = ({ navigation }) => {
           This feature estimates your HbA1c level based on the glucose values
           you have logged in the past week.
         </Text>
-        {glucoseCount < 10 ? (
+        {glucoseCount < 21 ? (
           <View>
             <Text style={styles.a1cText}>
-              You need to log at least 10 values in the past week to estimate
+              You need to log at least 21 values in the past week to estimate
               your HbA1c.
             </Text>
             <Text style={styles.a1cText}>
-              You currently have {glucoseCount} / 10 values logged in the past
+              You currently have {glucoseCount} / 21 values logged in the past
               week.
             </Text>
           </View>
@@ -639,12 +637,12 @@ const GlucoseMonitorScreen = ({ navigation }) => {
                   { fontSize: 14, marginLeft: "35%", marginTop: 2 },
                 ]}
               >
-                {glucoseCount} / 10
+                {glucoseCount} / 21
               </Text>
               <AntDesign name="right" size={18} color={colors.white} />
             </View>
             <ProgressBar
-              progress={glucoseCount / 10}
+              progress={glucoseCount / 21}
               color={colors.inactive}
               style={styles.progressBar}
             />
