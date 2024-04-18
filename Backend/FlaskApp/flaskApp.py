@@ -10,11 +10,6 @@ app = Flask(__name__)
 CORS(app)
 
 
-@app.route("/")
-def index():
-    return "Hello, World!"
-
-
 # Load the diabetes model from disk
 with open("final_predict_model.pkl", "rb") as file:
     diabetes_model = pickle.load(file)
@@ -116,7 +111,6 @@ with open("A1cModel.pkl", "rb") as file:
     model_data = pickle.load(file)
 
 a1c_model = model_data["model"]
-preprocessor = model_data["preprocessor"]
 
 
 @app.route("/estimate-a1c", methods=["POST"])
@@ -125,6 +119,8 @@ def estimate_a1c():
         data = request.get_json(force=True)
         readings = data.get("readings", [])
         input_data = pd.DataFrame(readings)
+
+        preprocessor = GlucoseDataPreprocessor()
 
         # Assign a default 'Patient_ID', 'Blood_Glucose' and 'HbA1c'
         input_data["Patient_ID"] = "default"
