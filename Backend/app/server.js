@@ -25,15 +25,7 @@ app.set("trust proxy", 1);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const serviceAccount = JSON.parse(
-  fs.readFileSync(
-    new URL(
-      "../../secrets/sugarcheck-0-firebase-adminsdk-sirmc-444be3e09d.json",
-      import.meta.url
-    ),
-    "utf-8"
-  )
-);
+const serviceAccount = JSON.parse(process.env.FIREBASE_CONFIG);
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
