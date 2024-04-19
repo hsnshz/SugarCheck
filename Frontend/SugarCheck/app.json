@@ -7,15 +7,19 @@
     "orientation": "portrait",
     "icon": "./assets/icons/AppIcon.png",
     "userInterfaceStyle": "light",
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.hassanshzd.SugarCheck"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/icons/AppIcon.png",
-        "backgroundColor": "background"
-      }
+        "backgroundColor": "#000000"
+      },
+      "package": "com.hassanshzd.SugarCheck"
     },
     "web": {
       "favicon": "./assets/icons/AppIcon.png"
@@ -24,6 +28,17 @@
       "icon": "./assets/icons/AppIcon.png",
       "color": "#000000",
       "iosDisplayInForeground": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "d2301be9-b91a-4a2b-a3ca-0a4da2fa7603"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/d2301be9-b91a-4a2b-a3ca-0a4da2fa7603"
     }
   }
 }
