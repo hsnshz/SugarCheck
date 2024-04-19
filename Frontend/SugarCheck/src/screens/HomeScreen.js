@@ -189,7 +189,12 @@ const Home = ({ navigation }) => {
           <Text
             style={[
               styles.welcomeText,
-              { marginTop: 15, fontSize: 20, fontFamily: "MontserratRegular" },
+              {
+                marginTop: 15,
+                fontSize: 20,
+                paddingBottom: 10,
+                fontFamily: "MontserratRegular",
+              },
             ]}
           >
             {new Date().toDateString()}

@@ -3,8 +3,6 @@ from flask_cors import CORS
 import pickle
 import pandas as pd
 import numpy as np
-from keras.models import load_model
-from sklearn.base import BaseEstimator, TransformerMixin
 from glucosePreprocessor import GlucoseDataPreprocessor
 
 app = Flask(__name__)
