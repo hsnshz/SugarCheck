@@ -42,4 +42,4 @@ Frontend/SugarCheck/config/constants.js
 
 # typescript
 *.tsbuildinfo
-Frontend/SugarCheck/*.tsbuildinfo
+Frontend/SugarCheck/*.tsbuildinfo.DS_Store
