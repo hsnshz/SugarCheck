@@ -10,8 +10,8 @@ import {
   Text,
   TouchableWithoutFeedback,
   Keyboard,
-  KeyboardAvoidingView,
   Animated,
+  ScrollView,
 } from "react-native";
 import colors from "../../config/colors";
 import { ButtonSecondary, Heading } from "../../config/styledText";
@@ -46,41 +46,7 @@ const SignUpScreen = ({ navigation }) => {
   const [step, setStep] = useState(1);
   const [errorMessage, setErrorMessage] = useState("");
 
-  const [moveAnimation] = useState(new Animated.Value(0));
-
   const toastRef = useRef(null);
-
-  const keyboardDidShow = useCallback(() => {
-    Animated.timing(moveAnimation, {
-      toValue: 0,
-      duration: 300,
-      useNativeDriver: false,
-    }).start();
-  });
-
-  const keyboardDidHide = useCallback(() => {
-    Animated.timing(moveAnimation, {
-      toValue: 0,
-      duration: 100,
-      useNativeDriver: false,
-    }).start();
-  });
-
-  useEffect(() => {
-    const keyboardDidShowListener = Keyboard.addListener(
-      "keyboardDidShow",
-      keyboardDidShow
-    );
-    const keyboardDidHideListener = Keyboard.addListener(
-      "keyboardDidHide",
-      keyboardDidHide
-    );
-
-    return () => {
-      keyboardDidShowListener.remove();
-      keyboardDidHideListener.remove();
-    };
-  }, []);
 
   const showDatepicker = () => {
     setShowDatePicker((previousState) => !previousState);
@@ -182,12 +148,12 @@ const SignUpScreen = ({ navigation }) => {
     return true;
   };
 
-  //SIGN UP API CALL
-  const API_ENDPOINT = `${getNgrokUrl()}/api/auth/signup`;
-
   const signUp = async (userData) => {
     try {
-      const response = await axios.post(API_ENDPOINT, userData);
+      const response = await axios.post(
+        `${getNgrokUrl()}/api/auth/signup`,
+        userData
+      );
 
       if (response.data.error) {
         throw new Error(response.data.error);
@@ -234,17 +200,6 @@ const SignUpScreen = ({ navigation }) => {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
         navigation.navigate("EmailVerificationScreen");
-
-        // navigation.dispatch(
-        //   CommonActions.reset({
-        //     index: 0,
-        //     routes: [
-        //       {
-        //         name: "Main",
-        //       },
-        //     ],
-        //   })
-        // );
       } catch (error) {
         console.error(error);
         toastRef.current.show("An error occurred. Please try again", {
@@ -266,7 +221,7 @@ const SignUpScreen = ({ navigation }) => {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View style={{ flex: 1 }}>
+      <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 200 }}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Icon name="left" size={30} color={colors.darkBlue} />
@@ -274,18 +229,14 @@ const SignUpScreen = ({ navigation }) => {
           <View style={{ width: 35 }} />
         </View>
 
-        <KeyboardAvoidingView
-          style={styles.container}
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          keyboardVerticalOffset={Platform.OS === "ios" ? 50 : 20}
-        >
+        <View style={styles.container}>
           <Image
             style={styles.logo}
             source={require("../../assets/icons/DarkAppIcon.png")}
           />
-          <Animated.View style={{ transform: [{ translateY: moveAnimation }] }}>
-            <Heading style={styles.heading}>SugarCheck</Heading>
-          </Animated.View>
+
+          <Heading style={styles.heading}>SugarCheck</Heading>
+
           {step === 1 && (
             <>
               <TextInput
@@ -456,6 +407,16 @@ const SignUpScreen = ({ navigation }) => {
             </>
           )}
 
+          <Text style={styles.signInPreText}>Already have an account? </Text>
+
+          <TouchableOpacity
+            onPress={() => navigation.navigate("SignIn")}
+            activeOpacity={0.8}
+            style={styles.signInBtn}
+          >
+            <Text style={styles.signInText}>Sign In</Text>
+          </TouchableOpacity>
+
           <Toast
             ref={toastRef}
             placement="top"
@@ -465,8 +426,8 @@ const SignUpScreen = ({ navigation }) => {
             opacity={1}
             textStyle={{ color: colors.white, fontFamily: "MontserratRegular" }}
           />
-        </KeyboardAvoidingView>
-      </View>
+        </View>
+      </ScrollView>
     </TouchableWithoutFeedback>
   );
 };
@@ -474,7 +435,6 @@ const SignUpScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
     alignItems: "center",
     backgroundColor: colors.background,
   },
@@ -543,6 +503,7 @@ const styles = StyleSheet.create({
     borderColor: colors.gray,
     color: colors.darkBlue,
     paddingRight: 30,
+    backgroundColor: colors.white,
   },
   inputAndroid: {
     width: "80%",
@@ -556,6 +517,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     color: colors.darkBlue,
     paddingRight: 30,
+    backgroundColor: colors.white,
   },
   requirementsView: {
     width: "80%",
@@ -582,6 +544,20 @@ const styles = StyleSheet.create({
     color: colors.danger,
     marginVertical: 10,
     marginBottom: 20,
+  },
+  signInPreText: {
+    fontFamily: "MontserratRegular",
+    fontSize: 16,
+    color: colors.darkBlue,
+    marginTop: 20,
+  },
+  signInBtn: {
+    marginTop: 10,
+  },
+  signInText: {
+    fontFamily: "MontserratRegular",
+    fontSize: 16,
+    color: colors.complementary,
   },
 });
 

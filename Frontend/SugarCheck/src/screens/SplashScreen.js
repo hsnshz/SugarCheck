@@ -1,9 +1,8 @@
 import React, { useEffect, useRef } from "react";
 import { View, Animated, StyleSheet, Dimensions } from "react-native";
 import colors from "../../config/colors";
-import { CommonActions } from "@react-navigation/native";
 
-const SplashScreen = ({ navigation }) => {
+const SplashScreen = ({ onDone }) => {
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const text = "SugarCheck".split("");
 
@@ -41,14 +40,9 @@ const SplashScreen = ({ navigation }) => {
         )
       ),
     ]).start(() => {
-      navigation.dispatch(
-        CommonActions.reset({
-          index: 0,
-          routes: [{ name: "Welcome" }],
-        })
-      );
+      onDone && onDone();
     });
-  }, [navigation, scaleAnim, animation]);
+  }, [scaleAnim, animation]);
 
   return (
     <View style={styles.container}>

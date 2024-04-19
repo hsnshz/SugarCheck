@@ -12,6 +12,7 @@ import {
   Keyboard,
   Animated,
   Text,
+  ScrollView,
 } from "react-native";
 import colors from "../../config/colors";
 import {
@@ -37,39 +38,6 @@ const SignInScreen = ({ navigation }) => {
   const [password, setPassword] = useState("");
 
   const [errorMessage, setErrorMessage] = useState("");
-  const [moveAnimation] = useState(new Animated.Value(0));
-
-  const keyboardDidShow = () => {
-    Animated.timing(moveAnimation, {
-      toValue: 0,
-      duration: 300,
-      useNativeDriver: false,
-    }).start();
-  };
-
-  const keyboardDidHide = () => {
-    Animated.timing(moveAnimation, {
-      toValue: 0,
-      duration: 100,
-      useNativeDriver: false,
-    }).start();
-  };
-
-  useEffect(() => {
-    const keyboardDidShowListener = Keyboard.addListener(
-      "keyboardDidShow",
-      keyboardDidShow
-    );
-    const keyboardDidHideListener = Keyboard.addListener(
-      "keyboardDidHide",
-      keyboardDidHide
-    );
-
-    return () => {
-      keyboardDidShowListener.remove();
-      keyboardDidHideListener.remove();
-    };
-  }, []);
 
   const validateInput = () => {
     if (username.trim() === "" || password.trim() === "") {
@@ -133,7 +101,7 @@ const SignInScreen = ({ navigation }) => {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View style={{ flex: 1 }}>
+      <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 50 }}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Icon name="left" size={30} color={colors.darkBlue} />
@@ -141,18 +109,13 @@ const SignInScreen = ({ navigation }) => {
           <View style={{ width: 35 }} />
         </View>
 
-        <KeyboardAvoidingView
-          style={styles.container}
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          keyboardVerticalOffset={Platform.OS === "ios" ? 25 : 20}
-        >
+        <View style={styles.container}>
           <Image
             style={styles.logo}
             source={require("../../assets/icons/DarkAppIcon.png")}
           />
-          <Animated.View style={{ transform: [{ translateY: moveAnimation }] }}>
-            <Heading style={styles.heading}>SugarCheck</Heading>
-          </Animated.View>
+
+          <Heading style={styles.heading}>SugarCheck</Heading>
 
           <TextInput
             style={styles.input}
@@ -206,8 +169,8 @@ const SignInScreen = ({ navigation }) => {
               <Text style={styles.btnSignUpText}>Go to Sign Up</Text>
             </TouchableOpacity>
           </View>
-        </KeyboardAvoidingView>
-      </View>
+        </View>
+      </ScrollView>
     </TouchableWithoutFeedback>
   );
 };
@@ -215,7 +178,7 @@ const SignInScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
+    paddingTop: 75,
     alignItems: "center",
     backgroundColor: colors.background,
   },

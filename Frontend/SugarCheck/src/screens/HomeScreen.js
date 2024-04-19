@@ -103,7 +103,7 @@ const Home = ({ navigation }) => {
     return () => {
       animatedValue.removeAllListeners();
     };
-  }, []);
+  }, [user, mealLogs]);
 
   useEffect(() => {
     if (user.profilePicture) {
@@ -134,8 +134,6 @@ const Home = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.safeAreaView}>
-      <StatusBar barStyle="light-content" backgroundColor={colors.darkBlue} />
-
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.openDrawer()}>
           <Ionicons name="ios-menu" size={35} color={colors.white} />

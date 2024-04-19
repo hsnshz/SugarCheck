@@ -1,9 +1,10 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
 import { useFonts } from "expo-font";
 import { NavigationContainer } from "@react-navigation/native";
 import colors from "./config/colors";
 import fonts from "./config/fonts";
+import SplashScreen from "./src/screens/SplashScreen";
 import { RootStackNavigator } from "./src/navigation/AppNavigator";
 import { Provider } from "react-redux";
 import { store, persistor } from "./src/store/store";
@@ -12,6 +13,8 @@ import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { LogBox } from "react-native";
 
 export default function App() {
+  const [isLoading, setIsLoading] = useState(true);
+
   useEffect(() => {
     LogBox.ignoreLogs([
       "Sending `onAnimatedValueUpdate` with no listeners registered.",
@@ -33,7 +36,11 @@ export default function App() {
       <Provider store={store}>
         <PersistGate loading={null} persistor={persistor}>
           <NavigationContainer>
-            <RootStackNavigator />
+            {isLoading ? (
+              <SplashScreen onDone={() => setIsLoading(false)} />
+            ) : (
+              <RootStackNavigator />
+            )}
           </NavigationContainer>
         </PersistGate>
       </Provider>

@@ -573,10 +573,6 @@ const GlucoseMonitorScreen = ({ navigation }) => {
           },
         }
       );
-
-      if (response.status === 200) {
-        console.log("Risk score saved successfully");
-      }
     } catch (error) {
       console.log("Error saving risk score", error);
     }

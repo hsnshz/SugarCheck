@@ -50,12 +50,7 @@ const Stack = createStackNavigator();
 
 export function RootStackNavigator() {
   return (
-    <Stack.Navigator initialRouteName="Splash">
-      <Stack.Screen
-        name="Splash"
-        component={SplashScreen}
-        options={{ headerShown: false }}
-      />
+    <Stack.Navigator initialRouteName="Welcome">
       <Stack.Screen
         name="Welcome"
         component={WelcomeScreen}
