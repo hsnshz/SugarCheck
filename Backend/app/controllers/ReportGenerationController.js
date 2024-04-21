@@ -149,8 +149,7 @@ export async function generateReport(req, res) {
       headless: true,
       executablePath:
         process.env.NODE_ENV === "production"
-          ? process.env.PUPPETEER_EXECUTABLE_PATH ||
-            "/app/.apt/usr/bin/google-chrome"
+          ? process.env.GOOGLE_CHROME_BIN
           : "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
     });
 
