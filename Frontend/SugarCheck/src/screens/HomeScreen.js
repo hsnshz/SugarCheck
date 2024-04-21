@@ -7,7 +7,6 @@ import {
   Animated,
   TouchableOpacity,
   Image,
-  StatusBar,
 } from "react-native";
 import { useSelector } from "react-redux";
 import CardComponent from "../components/CardComponent";
@@ -37,10 +36,7 @@ const Home = ({ navigation }) => {
       user.email &&
       user.healthProfile &&
       user.healthProfile.height &&
-      user.healthProfile.weight &&
-      user.healthProfile.dietaryRestrictions &&
-      user.healthProfile.allergies &&
-      user.healthProfile.medications
+      user.healthProfile.weight
     );
   };
 
@@ -54,7 +50,7 @@ const Home = ({ navigation }) => {
 
     const glucoseReadingsToday = user.healthProfile.glucoseReadings.filter(
       (reading) => {
-        const readingDate = new Date(reading.timestamp);
+        const readingDate = new Date(reading.recordedTimestamp);
         return readingDate >= today;
       }
     );
@@ -70,15 +66,16 @@ const Home = ({ navigation }) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const mealsToday = mealLogs.filter((meal) => {
-      if (meal && meal.date) {
-        const [dayName, date] = meal.date.split(", ");
-        const [day, month, year] = date.split("/");
-        const mealDate = new Date(`${year}-${month}-${day}`);
-        return mealDate >= today;
-      }
-      return false;
-    });
+    const mealsToday = mealLogs
+      .flatMap((log) => log.meals)
+      .filter((meal) => {
+        if (meal && meal.timestamp) {
+          const mealDate = new Date(meal.timestamp);
+          mealDate.setHours(0, 0, 0, 0);
+          return mealDate.getTime() === today.getTime();
+        }
+        return false;
+      });
 
     return mealsToday.length > 0;
   };
@@ -95,15 +92,28 @@ const Home = ({ navigation }) => {
     return false;
   };
 
-  useEffect(() => {
-    hasLoggedThreeGlucoseValuesToday(user);
-    hasLoggedMealToday(mealLogs);
-    hasTakenDiabetesTest(user);
+  hasTakenDiabetesTest(user);
+  hasLoggedThreeGlucoseValuesToday(user);
+  hasLoggedMealToday(mealLogs);
+  isProfileComplete(user);
 
+  useEffect(() => {
     return () => {
       animatedValue.removeAllListeners();
     };
-  }, [user, mealLogs]);
+  }, []);
+
+  useEffect(() => {
+    hasLoggedMealToday(mealLogs);
+  }, [mealLogs]);
+
+  useEffect(() => {
+    hasTakenDiabetesTest(user);
+  }, [user?.healthProfile?.riskAssessment]);
+
+  useEffect(() => {
+    hasLoggedThreeGlucoseValuesToday(user);
+  }, [user?.healthProfile?.glucoseReadings]);
 
   useEffect(() => {
     if (user.profilePicture) {
@@ -213,7 +223,7 @@ const Home = ({ navigation }) => {
                 text="It looks like your profile is incomplete. To get the most out of the
                 app, please complete your health profile."
                 btnText="Complete Profile"
-                navigateTo="HealthProfile"
+                navigateTo="HealthProfileScreen"
               />
             </View>
           ) : null}

@@ -36,6 +36,10 @@ const mealSlice = createSlice({
 
       Object.assign(meal, updatedMeal);
     },
+    deleteMealLog: (state, action) => {
+      const id = action.payload;
+      state.mealLogs = state.mealLogs.filter((log) => log.id !== id);
+    },
     setMealLogs: (state, action) => {
       state.mealLogs = action.payload;
     },

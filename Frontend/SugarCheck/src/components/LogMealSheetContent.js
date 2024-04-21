@@ -44,24 +44,78 @@ const LogMealSheetContent = ({ toggleSheet, onAdd }) => {
   const notesRef = useRef();
 
   const toastRef = useRef();
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleShowTimePicker = () => {
     Keyboard.dismiss();
     setShowTimePicker(true);
   };
 
-  const logMeal = async () => {
+  const validateInput = () => {
+    const regex = /^[a-zA-Z0-9 ]+$/;
+    const noNumberRegex = /^[a-zA-Z ]+$/;
+
+    // Validate Meal Name
+    if (!mealName.trim().match(noNumberRegex)) {
+      setErrorMessage("Invalid Meal Name");
+      return false;
+    }
+
+    // Validate Notes
+    if (notes === "") {
+      setNotes("No notes");
+    } else if (!notes.trim().match(regex)) {
+      setErrorMessage("Invalid Notes");
+      return false;
+    }
+
+    // Validate Calories
     if (
-      mealName === "" ||
-      calories === "" ||
-      carbohydrates === "" ||
-      fats === "" ||
-      proteins === "" ||
-      fiber === ""
+      Number(calories) <= 0 ||
+      isNaN(Number(calories)) ||
+      Number(calories) > 5000
     ) {
-      toastRef.current.show("Please fill all the fields", {
-        type: "danger",
-      });
+      setErrorMessage("Invalid Calories");
+      return false;
+    }
+
+    // Validate Carbohydrates
+    if (
+      Number(carbohydrates) <= 0 ||
+      isNaN(Number(carbohydrates)) ||
+      Number(carbohydrates) > 5000
+    ) {
+      setErrorMessage("Invalid Carbohydrates");
+      return false;
+    }
+
+    // Validate Fats
+    if (Number(fats) <= 0 || isNaN(Number(fats)) || Number(fats) > 5000) {
+      setErrorMessage("Invalid Fats");
+      return false;
+    }
+
+    // Validate Proteins
+    if (
+      Number(proteins) <= 0 ||
+      isNaN(Number(proteins)) ||
+      Number(proteins) > 5000
+    ) {
+      setErrorMessage("Invalid Proteins");
+      return false;
+    }
+
+    // Validate Fiber
+    if (Number(fiber) <= 0 || isNaN(Number(fiber)) || Number(fiber) > 5000) {
+      setErrorMessage("Invalid Fiber");
+      return false;
+    }
+
+    return true;
+  };
+
+  const logMeal = async () => {
+    if (!validateInput()) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       return;
     } else if (notes === "") {
@@ -234,6 +288,7 @@ const LogMealSheetContent = ({ toggleSheet, onAdd }) => {
                 value={timestamp}
                 is24Hour={true}
                 display="default"
+                maximumDate={new Date()}
                 onChange={(event, selectedTime) => {
                   setShowTimePicker(false);
 
@@ -263,6 +318,10 @@ const LogMealSheetContent = ({ toggleSheet, onAdd }) => {
           opacity={1}
           textStyle={{ color: colors.white, fontFamily: "MontserratRegular" }}
         />
+
+        {errorMessage !== "" && (
+          <Text style={styles.errorMessage}>{errorMessage}</Text>
+        )}
       </ScrollView>
     </View>
   );
@@ -319,6 +378,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: colors.white,
     textAlign: "center",
+  },
+  errorMessage: {
+    fontFamily: "MontserratRegular",
+    fontSize: 16,
+    color: colors.danger,
+    textAlign: "center",
+    marginTop: 20,
   },
 });
 

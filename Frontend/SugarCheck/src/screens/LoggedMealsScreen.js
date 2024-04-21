@@ -152,6 +152,7 @@ const LoggedMealsScreen = ({ navigation }) => {
               );
             }}
             mode="date"
+            maximumDate={new Date()}
           />
         )}
         <SwitchToggle

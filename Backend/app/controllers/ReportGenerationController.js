@@ -22,6 +22,16 @@ function isWithinRange(date, startDate, endDate) {
   return d >= start && d <= end;
 }
 
+async function deleteReport(reportId) {
+  Report.findByIdAndDelete(reportId, (err, report) => {
+    if (err) {
+      console.error(err);
+    } else {
+      console.log("Report deleted:", report);
+    }
+  });
+}
+
 export async function generateReport(req, res) {
   try {
     console.log("req.body: ", req.body);
@@ -83,7 +93,13 @@ export async function generateReport(req, res) {
     });
 
     if (existingReport) {
-      return res.status(200).json({ url: existingReport.reportURL });
+      if (existingReport.reportURL) {
+        console.log("Report already exists");
+        return res.status(200).json({ url: existingReport.reportURL });
+      } else {
+        // If the reportURL is empty, delete the report
+        await deleteReport(existingReport._id);
+      }
     }
 
     // Filter the user's data based on the startDate and endDate
@@ -121,6 +137,8 @@ export async function generateReport(req, res) {
 
     await report.save();
 
+    console.log("Report created");
+
     // Generate PDF
     const browser = await puppeteer.launch({
       args: [
@@ -131,8 +149,10 @@ export async function generateReport(req, res) {
       ],
       headless: true,
       executablePath:
-        process.env.PUPPETEER_EXECUTABLE_PATH ||
-        "/app/.apt/usr/bin/google-chrome",
+        process.env.NODE_ENV === "production"
+          ? process.env.PUPPETEER_EXECUTABLE_PATH ||
+            "/app/.apt/usr/bin/google-chrome"
+          : "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
     });
 
     const page = await browser.newPage();
@@ -338,7 +358,14 @@ export async function generateReport(req, res) {
 `;
 
     await page.setContent(html);
+    console.log("About to generate PDF");
     let pdf = await page.pdf({ format: "A4" });
+
+    if (!pdf) {
+      console.log("PDF generation failed");
+      return res.status(500).json({ message: "Error generating PDF" });
+    }
+    console.log("PDF generated");
     await browser.close();
 
     // Upload the PDF to Firebase Cloud Storage
@@ -361,6 +388,13 @@ export async function generateReport(req, res) {
     stream.on("finish", async () => {
       await file.makePublic();
       const url = `https://storage.googleapis.com/${bucket.name}/${file.name}`;
+
+      if (!url) {
+        console.log("URL generation failed");
+        return res.status(500).json({ message: "Error generating URL" });
+      }
+
+      console.log("URL generated");
 
       report.reportURL = url;
       await report.save();

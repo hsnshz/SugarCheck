@@ -153,6 +153,7 @@ const ActivityProgress = ({ navigation }) => {
                 );
               }}
               mode="date"
+              maximumDate={new Date()}
             />
           )}
         </View>

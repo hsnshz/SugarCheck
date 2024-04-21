@@ -23,18 +23,48 @@ const NutritionalAnalysisScreen = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  const [errorMessage, setErrorMessage] = useState(null);
+
+  const validateInput = () => {
+    if (!query) {
+      setErrorMessage("Please enter the ingredients you want to analyze.");
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      return false;
+    }
+
+    // Check if query contains only letters, numbers, spaces, and common ingredient separators
+    const isValid = /^[a-zA-Z0-9 ,.-]*$/.test(query);
+
+    // Check if query is a valid number
+    const isNumber = !isNaN(query);
+
+    // Check if query is a valid name or recipe (contains at least one letter)
+    const isNameOrRecipe = /[a-zA-Z]/.test(query);
+
+    if (!isValid || (!isNumber && !isNameOrRecipe)) {
+      setErrorMessage(
+        "Please enter valid ingredients. Only letters, numbers, spaces, commas, periods, and hyphens are allowed."
+      );
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      return false;
+    }
+
+    return true;
+  };
+
   const fetchNutritionInfo = async () => {
     setIsLoading(true);
+
+    if (!validateInput()) {
+      setIsLoading(false);
+      return;
+    }
 
     let url = `https://api.edamam.com/api/nutrition-details?app_id=${
       getNutritionAPIInfo().NUTRITION_APP_ID
     }&app_key=${getNutritionAPIInfo().NUTRITION_APP_KEY}`;
 
     try {
-      console.log(query);
-      console.log(query.split("\n"));
-      console.log(url);
-
       const response = await axios.post(url, {
         ingr: query.split("\n"),
       });
@@ -42,13 +72,9 @@ const NutritionalAnalysisScreen = () => {
       setNutritionInfo(response.data);
       setIsLoading(false);
     } catch (error) {
-      console.log(error);
-
-      if (error.response) {
-        console.error("Response data:", error.response.data);
-        console.error("Response status:", error.response.status);
-        console.error("Response headers:", error.response.headers);
-      }
+      setErrorMessage(
+        "An error occurred while fetching nutrition information. Please try again."
+      );
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       setIsLoading(false);
@@ -101,6 +127,10 @@ const NutritionalAnalysisScreen = () => {
             <RecipeAnalysisInformation nutritionInfo={nutritionInfo} />
           )
         )}
+
+        {errorMessage && (
+          <Text style={styles.errorMessage}>{errorMessage}</Text>
+        )}
       </ScrollView>
     </View>
   );
@@ -151,6 +181,14 @@ const styles = StyleSheet.create({
     padding: 20,
     marginBottom: 10,
     marginRight: 5,
+  },
+  errorMessage: {
+    fontFamily: "MontserratRegular",
+    fontSize: 16,
+    color: colors.danger,
+    textAlign: "center",
+    marginHorizontal: 20,
+    marginTop: 20,
   },
 });
 

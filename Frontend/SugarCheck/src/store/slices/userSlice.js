@@ -91,28 +91,32 @@ const userSlice = createSlice({
       };
     },
     addGlucoseValueSlice: (state, action) => {
-      state.user.healthProfile = {
-        ...state.user.healthProfile,
-        ...action.payload,
-        glucoseReadings: [
-          ...state.user.healthProfile.glucoseReadings,
-          {
-            glucoseValue: action.payload.glucoseValue,
-            recordedTimestamp: action.payload.recordedTimestamp,
-          },
-        ],
-      };
+      state.user.healthProfile.glucoseReadings.push({
+        glucoseValue: action.payload.glucoseValue,
+        recordedTimestamp: action.payload.recordedTimestamp,
+        id: action.payload.id,
+      });
     },
     updateGlucoseValueSlice: (state, action) => {
       state.user.healthProfile.glucoseReadings =
         state.user.healthProfile.glucoseReadings.map((reading) =>
-          reading._id === action.payload.id
+          reading.id === action.payload.id
             ? {
                 timestamp: action.payload.timestamp,
                 glucoseValue: action.payload.glucoseValue,
+                id: action.payload.id,
               }
             : reading
         );
+    },
+    deleteGlucoseValueSlice: (state, action) => {
+      const updatedReadings = state.user.healthProfile.glucoseReadings.filter(
+        (reading) => {
+          return reading.id !== action.payload.id;
+        }
+      );
+
+      state.user.healthProfile.glucoseReadings = updatedReadings;
     },
     addA1cReadingSlice: (state, action) => {
       state.user.healthProfile = {
@@ -136,6 +140,7 @@ export const {
   updateUserSettings,
   addGlucoseValueSlice,
   updateGlucoseValueSlice,
+  deleteGlucoseValueSlice,
   addA1cReadingSlice,
 } = userSlice.actions;
 

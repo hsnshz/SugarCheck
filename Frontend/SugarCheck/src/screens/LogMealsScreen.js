@@ -8,8 +8,6 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
-  Image,
-  Keyboard,
 } from "react-native";
 import colors from "../../config/colors";
 import { getFoodDBAPIInfo } from "../../config/constants";
@@ -42,16 +40,12 @@ const LogMealsScreen = ({ navigation }) => {
       getFoodDBAPIInfo().FOOD_DB_APP_ID
     }&app_key=${getFoodDBAPIInfo().FOOD_DB_APP_KEY}&ingr=${query}`;
 
-    console.log(url);
-
     try {
       const response = await axios.get(url);
 
       setFoodItems(response.data.hints);
       setIsLoading(false);
     } catch (error) {
-      console.log(error);
-
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       setIsLoading(false);
     }

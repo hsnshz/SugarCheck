@@ -214,6 +214,7 @@ const LoggedMealSheetContent = ({ meal, onUpdate }) => {
                 value={timestamp}
                 is24Hour={true}
                 display="default"
+                maximumDate={new Date()}
                 onChange={(event, selectedDate) => {
                   setShowTimePicker(false);
 

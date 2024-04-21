@@ -25,6 +25,7 @@ import { useDispatch } from "react-redux";
 import { Ionicons } from "@expo/vector-icons";
 import Icon from "react-native-vector-icons/AntDesign";
 import * as Haptics from "expo-haptics";
+import CardComponent from "../components/CardComponent";
 
 const { width: viewportWidth } = Dimensions.get("window");
 
@@ -49,6 +50,8 @@ const DiabetesForm = ({ navigation }) => {
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const carouselRef = useRef(null);
+  const scrollViewRef = useRef(null);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const onRefresh = () => {
     setPredictionResult("");
@@ -73,6 +76,18 @@ const DiabetesForm = ({ navigation }) => {
       index: 0,
       animated: true,
     });
+  };
+
+  const isProfileComplete = (user) => {
+    return (
+      user &&
+      user.firstName &&
+      user.lastName &&
+      user.email &&
+      user.healthProfile &&
+      user.healthProfile.height &&
+      user.healthProfile.weight
+    );
   };
 
   useEffect(() => {
@@ -378,6 +393,24 @@ const DiabetesForm = ({ navigation }) => {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
         setPredictionResult(response.data.predictionResult);
+        setFormData({
+          polyuria: "",
+          polydipsia: "",
+          "sudden weight loss": "",
+          weakness: "",
+          polyphagia: "",
+          "genital thrush": "",
+          "visual blurring": "",
+          itching: "",
+          irritability: "",
+          "delayed healing": "",
+          "partial paresis": "",
+          "muscle stiffness": "",
+          alopecia: "",
+          obesity: "",
+        });
+        setIsSubmitted(true);
+        scrollViewRef.current?.scrollToEnd({ animated: true });
       })
       .catch((error) => {
         console.error("Error:", error);
@@ -389,6 +422,7 @@ const DiabetesForm = ({ navigation }) => {
       <ScrollView
         contentContainerStyle={{ flexGrow: 1, paddingBottom: 150 }}
         refreshControl={<RefreshControl onRefresh={onRefresh} />}
+        ref={scrollViewRef}
       >
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.openDrawer()}>
@@ -409,118 +443,135 @@ const DiabetesForm = ({ navigation }) => {
           </Subheading>
         </View>
 
-        <Carousel
-          mode="horizontal-stack"
-          modeConfig={{ snapDirection: "left" }}
-          ref={carouselRef}
-          data={formSteps}
-          renderItem={renderItem}
-          width={viewportWidth}
-          height={400}
-          loop={false}
-          lockScrollWhileSnapping
-          onSnapToItem={(index) => {
-            if (isStepComplete(currentIndex)) {
-              setCurrentIndex(index);
-            } else if (index > currentIndex) {
-              carouselRef.current?.scrollTo({
-                index: currentIndex,
-                animated: true,
-              });
-              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-            }
-          }}
-        />
-
-        {showInformation &&
-          formQuestions.map((question, index) =>
-            question.label === selectedInfoLabel ? (
-              <TouchableWithoutFeedback
-                key={question.label}
-                onPress={() => {
-                  fadeOut();
-                }}
-              >
-                <Animated.View
-                  pointerEvents={showInformation ? "auto" : "none"}
-                  style={[styles.overlay, { opacity: fadeAnim }]}
-                >
-                  <View style={styles.informationBox}>
-                    <Icon
-                      name="close"
-                      size={22}
-                      color={colors.complementary}
-                      style={{ alignSelf: "flex-end", marginBottom: 10 }}
-                    />
-                    <Text style={styles.informationText}>
-                      {question.information}
-                    </Text>
-                  </View>
-                </Animated.View>
-              </TouchableWithoutFeedback>
-            ) : null
-          )}
-
-        {predictionResult && (
+        {!isProfileComplete(user) ? (
+          <View style={styles.profileCardContainer}>
+            <CardComponent
+              title="Get the full experience!"
+              text="It looks like your profile is incomplete. To use the diabetes prediction feature, please complete your health profile first."
+              btnText="Complete Profile"
+              navigateTo="HealthProfileScreen"
+            />
+          </View>
+        ) : (
           <>
-            {predictionResult === "likely" ? (
-              <View style={styles.predictionView}>
-                <Icon
-                  name="exclamationcircleo"
-                  size={35}
-                  color={colors.danger}
-                  style={styles.icon}
-                />
-                <Heading>Prediction Result</Heading>
-                <Text style={styles.detailText}>
-                  Based on the information provided, you are{" "}
-                  <Text style={{ fontWeight: "bold" }}>likely</Text> to have
-                  diabetes
-                </Text>
-                <Text style={styles.detailText}>
-                  Disclaimer: This prediction is not a substitute for a
-                  professional medical diagnosis. Please consult with your
-                  healthcare provider for further evaluation.
-                </Text>
-              </View>
-            ) : (
-              <View style={styles.predictionView}>
-                <Icon
-                  name="checkcircleo"
-                  size={35}
-                  color={colors.green}
-                  style={styles.icon}
-                />
-                <Heading>Prediction Result</Heading>
-                <Text style={styles.detailText}>
-                  Based on the information provided, you are{" "}
-                  <Text style={{ fontWeight: "bold" }}>unlikely</Text> to have
-                  diabetes
-                </Text>
-                <Text style={styles.detailText}>
-                  Disclaimer: This prediction is not a substitute for a
-                  professional medical diagnosis. Please consult with your
-                  healthcare provider for further evaluation.
-                </Text>
-              </View>
+            {isSubmitted ? null : (
+              <Carousel
+                mode="horizontal-stack"
+                modeConfig={{ snapDirection: "left" }}
+                ref={carouselRef}
+                data={formSteps}
+                renderItem={renderItem}
+                width={viewportWidth}
+                height={400}
+                loop={false}
+                lockScrollWhileSnapping
+                onSnapToItem={(index) => {
+                  if (isStepComplete(currentIndex)) {
+                    setCurrentIndex(index);
+                  } else if (index > currentIndex) {
+                    carouselRef.current?.scrollTo({
+                      index: currentIndex,
+                      animated: true,
+                    });
+                    Haptics.notificationAsync(
+                      Haptics.NotificationFeedbackType.Error
+                    );
+                  }
+                }}
+              />
             )}
 
-            <View style={[styles.predictionView, { marginTop: 30 }]}>
-              <Heading>Next Steps</Heading>
-              <View style={styles.listView}>
-                {recommendations.map((recommendation, index) => (
-                  <View
-                    style={styles.listContainer}
-                    key={`recommendation-${index}`}
+            {showInformation &&
+              formQuestions.map((question) =>
+                question.label === selectedInfoLabel ? (
+                  <TouchableWithoutFeedback
+                    key={question.label}
+                    onPress={() => {
+                      fadeOut();
+                    }}
                   >
-                    <Text style={[styles.listText, { paddingRight: 15 }]}>
-                      {index + 1}.
+                    <Animated.View
+                      pointerEvents={showInformation ? "auto" : "none"}
+                      style={[styles.overlay, { opacity: fadeAnim }]}
+                    >
+                      <View style={styles.informationBox}>
+                        <Icon
+                          name="close"
+                          size={22}
+                          color={colors.complementary}
+                          style={{ alignSelf: "flex-end", marginBottom: 10 }}
+                        />
+                        <Text style={styles.informationText}>
+                          {question.information}
+                        </Text>
+                      </View>
+                    </Animated.View>
+                  </TouchableWithoutFeedback>
+                ) : null
+              )}
+
+            {predictionResult && (
+              <>
+                {predictionResult === "likely" ? (
+                  <View style={styles.predictionView}>
+                    <Icon
+                      name="exclamationcircleo"
+                      size={35}
+                      color={colors.danger}
+                      style={styles.icon}
+                    />
+                    <Heading>Prediction Result</Heading>
+                    <Text style={styles.detailText}>
+                      Based on the information provided, you are{" "}
+                      <Text style={{ fontWeight: "bold" }}>likely</Text> to have
+                      diabetes
                     </Text>
-                    <Text style={styles.listText}>{recommendation}</Text>
+                    <Text style={styles.detailText}>
+                      Disclaimer: This prediction is not a substitute for a
+                      professional medical diagnosis. Please consult with your
+                      healthcare provider for further evaluation.
+                    </Text>
                   </View>
-                ))}
-              </View>
-            </View>
+                ) : (
+                  <View style={styles.predictionView}>
+                    <Icon
+                      name="checkcircleo"
+                      size={35}
+                      color={colors.green}
+                      style={styles.icon}
+                    />
+                    <Heading>Prediction Result</Heading>
+                    <Text style={styles.detailText}>
+                      Based on the information provided, you are{" "}
+                      <Text style={{ fontWeight: "bold" }}>unlikely</Text> to
+                      have diabetes
+                    </Text>
+                    <Text style={styles.detailText}>
+                      Disclaimer: This prediction is not a substitute for a
+                      professional medical diagnosis. Please consult with your
+                      healthcare provider for further evaluation.
+                    </Text>
+                  </View>
+                )}
+
+                <View style={[styles.predictionView, { marginTop: 30 }]}>
+                  <Heading>Next Steps</Heading>
+                  <View style={styles.listView}>
+                    {recommendations.map((recommendation, index) => (
+                      <View
+                        style={styles.listContainer}
+                        key={`recommendation-${index}`}
+                      >
+                        <Text style={[styles.listText, { paddingRight: 15 }]}>
+                          {index + 1}.
+                        </Text>
+                        <Text style={styles.listText}>{recommendation}</Text>
+                      </View>
+                    ))}
+                  </View>
+                </View>
+              </>
+            )}
           </>
         )}
       </ScrollView>

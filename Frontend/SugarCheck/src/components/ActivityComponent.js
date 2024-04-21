@@ -154,6 +154,7 @@ const ActivityComponent = ({
                     setShowDatePicker(false);
                   }}
                   mode="date"
+                  maximumDate={new Date()}
                 />
               )}
 

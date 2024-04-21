@@ -114,13 +114,35 @@ const HealthProfile = ({ navigation }) => {
       </View>
 
       <ScrollView
-        contentContainerStyle={{ flexGrow: 1, paddingBottom: 100, padding: 20 }}
+        contentContainerStyle={{
+          flexGrow: 1,
+          paddingBottom: 300,
+          padding: 20,
+        }}
       >
         <Text style={styles.label}>Height (cm):</Text>
         <TextInput
           style={styles.input}
           value={String(height)}
-          onChangeText={(text) => setHeight(Number(text))}
+          onChangeText={(text) => {
+            const newHeight = Number(text);
+
+            if (newHeight > 300) {
+              toastRef.current.show("Height cannot be greater than 300 cm", {
+                type: "danger",
+              });
+              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+              return;
+            } else if (newHeight < 0) {
+              toastRef.current.show("Height cannot be negative", {
+                type: "danger",
+              });
+              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+              return;
+            } else {
+              setHeight(Number(text));
+            }
+          }}
           keyboardType="numeric"
           returnKeyType="next"
           onSubmitEditing={() => {
@@ -132,7 +154,25 @@ const HealthProfile = ({ navigation }) => {
           ref={firstTextInputRef}
           style={styles.input}
           value={String(weight)}
-          onChangeText={(text) => setWeight(Number(text))}
+          onChangeText={(text) => {
+            const newWeight = Number(text);
+
+            if (newWeight > 300) {
+              toastRef.current.show("Weight cannot be greater than 300 kg", {
+                type: "danger",
+              });
+              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+              return;
+            } else if (newWeight < 0) {
+              toastRef.current.show("Weight cannot be negative", {
+                type: "danger",
+              });
+              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+              return;
+            } else {
+              setWeight(Number(text));
+            }
+          }}
           keyboardType="numeric"
           returnKeyType="next"
           onSubmitEditing={() => {

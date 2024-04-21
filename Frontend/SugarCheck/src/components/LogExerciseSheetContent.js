@@ -178,6 +178,7 @@ const LogExerciseSheetContent = ({ toggleSheet, onAdd }) => {
                 value={date}
                 is24Hour={true}
                 display="default"
+                maximumDate={new Date()}
                 onChange={(event, selectedDate) => {
                   setShowDatePicker(false);
                   if (selectedDate) {

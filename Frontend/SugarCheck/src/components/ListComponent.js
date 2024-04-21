@@ -18,7 +18,10 @@ import colors from "../../config/colors";
 import Icon from "react-native-vector-icons/AntDesign";
 import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
-import { updateGlucoseValueSlice } from "../store/slices/userSlice";
+import {
+  updateGlucoseValueSlice,
+  deleteGlucoseValueSlice,
+} from "../store/slices/userSlice";
 import { getNgrokUrl } from "../../config/constants";
 import Dialog from "react-native-dialog";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -155,9 +158,10 @@ const ListComponent = ({
             id: readingId,
           })
         );
+
+        swipeableRefs.current.forEach((ref) => ref && ref.close());
       }
 
-      swipeableRefs.current.forEach((ref) => ref && ref.close());
       setCurrentTimestamp(recordedTimestamp);
       setIsDialogVisible(false);
     } catch (error) {
@@ -178,7 +182,13 @@ const ListComponent = ({
       );
 
       if (response.status === 200) {
+        dispatch(deleteGlucoseValueSlice({ id: readingId }));
         onRemove(readingId);
+
+        swipeableRefs.current.forEach((ref) => ref && ref.close());
+        swipeableRefs.current = swipeableRefs.current.filter(
+          (ref, index) => index !== openSwipeable
+        );
       }
     } catch (error) {
       console.error(error);

@@ -99,6 +99,11 @@ export function RootStackNavigator() {
         component={GetStartedScreen}
         options={{ headerShown: false }}
       />
+      <Stack.Screen
+        name="HealthProfileScreen"
+        component={HealthProfile}
+        options={{ headerShown: false }}
+      />
     </Stack.Navigator>
   );
 }

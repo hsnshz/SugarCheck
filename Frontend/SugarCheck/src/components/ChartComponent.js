@@ -81,9 +81,9 @@ const ChartComponent = ({
                   width={Dimensions.get("window").width - 20}
                   height={260}
                   yAxisLabel=""
-                  yAxisSuffix="mg/dL"
+                  yAxisSuffix=""
                   yAxisInterval={5}
-                  yLabelsOffset={2}
+                  yLabelsOffset={15}
                   xLabelsOffset={5}
                   chartConfig={{
                     backgroundColor: colors.primary,

@@ -56,7 +56,6 @@ const FavoriteRecipesScreen = ({ navigation }) => {
   const getFromAPI = async (url) => {
     try {
       const response = await axios.get(url);
-
       return response.data;
     } catch (error) {
       console.log("Error: ", error);
@@ -105,6 +104,8 @@ const FavoriteRecipesScreen = ({ navigation }) => {
             size="large"
             color={colors.darkBlue}
           />
+        ) : recipes.length === 0 ? (
+          <Text style={styles.noFavoritesText}>No favorite recipes found.</Text>
         ) : (
           recipes.map((hit, index) => (
             <RecipeCardComponent
@@ -151,6 +152,13 @@ const styles = StyleSheet.create({
     color: colors.darkBlue,
     textAlign: "center",
     marginVertical: 10,
+  },
+  noFavoritesText: {
+    fontFamily: "MontserratRegular",
+    fontSize: 16,
+    color: colors.darkBlue,
+    textAlign: "center",
+    marginVertical: 100,
   },
 });
 

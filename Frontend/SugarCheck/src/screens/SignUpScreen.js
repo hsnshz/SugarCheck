@@ -10,7 +10,6 @@ import {
   Text,
   TouchableWithoutFeedback,
   Keyboard,
-  Animated,
   ScrollView,
 } from "react-native";
 import colors from "../../config/colors";
@@ -28,6 +27,8 @@ import moment from "moment";
 import * as Haptics from "expo-haptics";
 import Toast from "react-native-fast-toast";
 import * as Notifications from "expo-notifications";
+import CountryPicker from "react-native-country-picker-modal";
+import { isValidNumber } from "libphonenumber-js";
 
 const SignUpScreen = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -45,6 +46,8 @@ const SignUpScreen = ({ navigation }) => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [step, setStep] = useState(1);
   const [errorMessage, setErrorMessage] = useState("");
+
+  const [countryCode, setCountryCode] = useState("GB");
 
   const toastRef = useRef(null);
 
@@ -106,6 +109,13 @@ const SignUpScreen = ({ navigation }) => {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!emailRegex.test(email)) {
       setErrorMessage("Please enter a valid email");
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      return false;
+    }
+
+    // Phone number validation
+    if (!isValidNumber(phoneNumber, countryCode)) {
+      setErrorMessage("Please enter a valid phone number");
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       return false;
     }
@@ -212,11 +222,6 @@ const SignUpScreen = ({ navigation }) => {
 
   async function setupNotifications() {
     const { status } = await Notifications.getPermissionsAsync();
-
-    if (status !== "granted") {
-      alert("You need to enable notifications in your settings");
-      return;
-    }
   }
 
   return (
@@ -282,11 +287,12 @@ const SignUpScreen = ({ navigation }) => {
                 )}
               </View>
               <RNPickerSelect
-                placeholder={{ label: "Choose Gender", value: null }}
+                placeholder={{ label: "Choose Gender", value: "" }}
                 onValueChange={(value) => {
-                  if (value !== null) {
+                  if (value !== null && value !== "") {
                     setGender(value);
                   } else {
+                    setGender("");
                     toastRef.current.show("Please select an option", {
                       type: "danger",
                     });
@@ -328,16 +334,44 @@ const SignUpScreen = ({ navigation }) => {
                   this.ThirdTextInput.focus();
                 }}
               />
-              <TextInput
-                ref={(input) => {
-                  this.ThirdTextInput = input;
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginBottom: 10,
                 }}
-                style={styles.input}
-                placeholder="Phone Number"
-                value={phoneNumber}
-                onChangeText={setPhoneNumber}
-                keyboardType="phone-pad"
-              />
+              >
+                <CountryPicker
+                  withFilter
+                  withFlag
+                  withCallingCodeButton
+                  countryCode={countryCode}
+                  onSelect={(country) => setCountryCode(country.cca2)}
+                  containerButtonStyle={{
+                    backgroundColor: colors.white,
+                    padding: 5,
+                    marginRight: 10,
+                    borderWidth: 1,
+                    borderColor: colors.gray,
+                    height: 40,
+                  }}
+                  preferredCountries={["GB", "US"]}
+                />
+                <TextInput
+                  ref={(input) => {
+                    this.ThirdTextInput = input;
+                  }}
+                  style={[
+                    styles.input,
+                    { width: "55%", marginLeft: 5, marginBottom: 0 },
+                  ]}
+                  placeholder="Phone Number"
+                  value={phoneNumber}
+                  onChangeText={setPhoneNumber}
+                  keyboardType="phone-pad"
+                />
+              </View>
               <TextInput
                 style={styles.input}
                 placeholder="Username"

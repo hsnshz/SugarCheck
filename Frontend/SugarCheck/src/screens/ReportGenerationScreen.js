@@ -18,19 +18,43 @@ import Icon from "react-native-vector-icons/AntDesign";
 import { useSelector } from "react-redux";
 import RNPickerSelect from "react-native-picker-select";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import * as Haptics from "expo-haptics";
 
 const ReportGenerationScreen = ({ navigation }) => {
   const user = useSelector((state) => state.user.user) || {};
   const token = useSelector((state) => state.auth.token) || "";
 
-  const [reportType, setReportType] = useState("weekly");
+  const [reportType, setReportType] = useState("");
   const [startDate, setStartDate] = useState(new Date());
 
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const validateInputs = () => {
+    if (!startDate) {
+      setErrorMessage("Please select a start date.");
+      return false;
+    }
+
+    if (!reportType) {
+      setErrorMessage("Please select a report type.");
+      return false;
+    }
+
+    return true;
+  };
+
   const generateReport = async () => {
     try {
+      if (!validateInputs()) {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        return;
+      }
+
+      console.log(reportType, startDate);
+
       setIsLoading(true);
 
       const response = await axios.post(
@@ -47,13 +71,29 @@ const ReportGenerationScreen = ({ navigation }) => {
         }
       );
 
-      const firebaseUrl = response.data.url;
+      console.log(response);
 
-      navigation.navigate("PdfViewerScreen", { file: firebaseUrl });
+      if (response.status === 201 || response.status === 200) {
+        const firebaseUrl = response.data.url;
+
+        if (!firebaseUrl) {
+          throw new Error(
+            "Report could not be generated. Please try again later."
+          );
+        }
+
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        navigation.navigate("PdfViewerScreen", { file: firebaseUrl });
+      }
+
       setIsLoading(false);
+      setErrorMessage("");
+      setReportType("");
+      setStartDate(new Date());
     } catch (error) {
       console.log(error);
       setIsLoading(false);
+      setErrorMessage("An error occurred. Please try again.");
     }
   };
 
@@ -118,6 +158,7 @@ const ReportGenerationScreen = ({ navigation }) => {
                       setShowDatePicker(false);
                     }}
                     mode="date"
+                    maximumDate={new Date()}
                   />
                 )}
               </View>
@@ -129,7 +170,15 @@ const ReportGenerationScreen = ({ navigation }) => {
                     label: "Select report type",
                     value: null,
                   }}
-                  onValueChange={(value) => setReportType(value)}
+                  onValueChange={(value) => {
+                    if (value != null && value != "") {
+                      setErrorMessage("");
+                      setReportType(value);
+                    } else {
+                      setReportType("");
+                      setErrorMessage("Please select a report type.");
+                    }
+                  }}
                   items={[
                     { label: "Weekly", value: "weekly" },
                     { label: "Monthly", value: "monthly" },
@@ -152,6 +201,10 @@ const ReportGenerationScreen = ({ navigation }) => {
               </TouchableOpacity>
             </View>
           </>
+        )}
+
+        {errorMessage && (
+          <Text style={styles.errorMessage}>{errorMessage}</Text>
         )}
       </ScrollView>
     </SafeAreaView>
@@ -270,6 +323,14 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  errorMessage: {
+    fontFamily: "MontserratRegular",
+    fontSize: 16,
+    color: colors.danger,
+    textAlign: "center",
+    marginVertical: 20,
+    marginHorizontal: 20,
   },
 });
 

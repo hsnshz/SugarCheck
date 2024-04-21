@@ -162,6 +162,7 @@ const FoodItemCardComponent = ({ item, onAdd }) => {
                 value={selectedTime}
                 is24Hour={true}
                 display="default"
+                maximumDate={new Date()}
                 onChange={(event, selectedTime) => {
                   setShowTimePicker(false);
 

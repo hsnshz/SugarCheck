@@ -171,6 +171,8 @@ const RecipeSearchScreen = () => {
 
   const toastRef = useRef(null);
 
+  const [scrollKey, setScrollKey] = useState(0);
+
   function toCamelCase(str) {
     return str
       .split(" ")
@@ -280,6 +282,7 @@ const RecipeSearchScreen = () => {
     if (isSheetVisible) {
       setIsSheetVisible(false);
       fadeOut();
+      setScrollKey((prev) => prev + 1);
     } else {
       setIsSheetVisible(true);
       fadeIn();
@@ -365,13 +368,19 @@ const RecipeSearchScreen = () => {
     return (
       <View style={styles.sheetContent}>
         <SectionList
+          style={{ flex: 1 }}
           sections={sections}
           keyExtractor={(item, index) => `${item.id}-${index}`}
           renderItem={renderItem}
           renderSectionHeader={renderSectionHeader}
         />
 
-        <View style={styles.selectedFiltersContainer}>
+        <ScrollView
+          horizontal
+          style={styles.selectedFiltersContainer}
+          contentContainerStyle={{ flexGrow: 1 }}
+          key={scrollKey}
+        >
           {selectedItems.map((selectedItem) => {
             return (
               <View
@@ -390,7 +399,7 @@ const RecipeSearchScreen = () => {
               </View>
             );
           })}
-        </View>
+        </ScrollView>
 
         <TouchableOpacity
           style={styles.confirmBtn}
@@ -704,8 +713,9 @@ const styles = StyleSheet.create({
   selectedFiltersContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "center",
-    alignItems: "center",
+    maxHeight: 80,
+    // justifyContent: "center",
+    // alignItems: "center",
   },
   selectedItem: {
     backgroundColor: colors.disabled,

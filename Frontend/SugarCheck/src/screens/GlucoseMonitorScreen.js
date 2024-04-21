@@ -72,12 +72,6 @@ const GlucoseMonitorScreen = ({ navigation }) => {
 
   const [riskScore, setRiskScore] = useState("");
 
-  const [bmi] = useState(user?.healthProfile?.bmi ? user.healthProfile.bmi : 0);
-  const [age] = useState(
-    user?.healthProfile?.riskFactors?.age
-      ? user.healthProfile.riskFactors.age
-      : 0
-  );
   const [gender] = useState(
     user ? user?.gender?.charAt(0).toUpperCase() + user?.gender?.slice(1) : ""
   );
@@ -88,9 +82,6 @@ const GlucoseMonitorScreen = ({ navigation }) => {
     timestamps: latestTimestamps,
     glucose_values: latestGlucoseValues,
   });
-
-  let gender_male = 0;
-  let gender_female = 0;
 
   const toastRef = useRef();
   const scrollRef = useRef();
@@ -310,6 +301,7 @@ const GlucoseMonitorScreen = ({ navigation }) => {
           addGlucoseValueSlice({
             glucoseValue: Number(inputValue),
             recordedTimestamp: recordedTime,
+            id: response.data.data.id,
           })
         );
       })
@@ -374,6 +366,11 @@ const GlucoseMonitorScreen = ({ navigation }) => {
       setTimestamps(newTimestamps);
       setGlucoseIds(newGlucoseIds);
       setButtonDisabled(false);
+      setValuesPerDay({
+        ...valuesPerDay,
+        [selectedDate.toISOString().split("T")[0]]:
+          valuesPerDay[selectedDate.toISOString().split("T")[0]] - 1,
+      });
 
       toastRef.current.show("Glucose value removed successfully", {
         type: "success",
@@ -665,7 +662,37 @@ const GlucoseMonitorScreen = ({ navigation }) => {
             <Dialog.Input
               placeholder="Enter glucose value"
               value={inputValue}
-              onChangeText={(text) => setInputValue(text)}
+              onChangeText={(text) => {
+                const newValue = Number(text);
+
+                if (newValue < 0 || newValue > 400) {
+                  toastRef.current.show(
+                    "Please enter a valid glucose value (20-400)",
+                    {
+                      type: "danger",
+                    }
+                  );
+                  Haptics.notificationAsync(
+                    Haptics.NotificationFeedbackType.Error
+                  );
+                  return;
+                } else if (newValue === 0 && text !== "") {
+                  toastRef.current.show(
+                    "Please enter a valid glucose value (1-400)",
+                    {
+                      type: "danger",
+                    }
+                  );
+                  Haptics.notificationAsync(
+                    Haptics.NotificationFeedbackType.Error
+                  );
+
+                  setInputValue("");
+                  return;
+                } else {
+                  setInputValue(text);
+                }
+              }}
               keyboardType="numeric"
               returnKeyType="done"
               autoFocus={true}
@@ -716,7 +743,7 @@ const GlucoseMonitorScreen = ({ navigation }) => {
           <Toast
             ref={toastRef}
             placement="top"
-            style={{ backgroundColor: colors.darkBlue }}
+            style={{ backgroundColor: colors.darkBlue, marginTop: 60 }}
             fadeInDuration={750}
             fadeOutDuration={1000}
             opacity={1}
