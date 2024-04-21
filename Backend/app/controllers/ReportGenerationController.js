@@ -23,13 +23,12 @@ function isWithinRange(date, startDate, endDate) {
 }
 
 async function deleteReport(reportId) {
-  Report.findByIdAndDelete(reportId, (err, report) => {
-    if (err) {
-      console.error(err);
-    } else {
-      console.log("Report deleted:", report);
-    }
-  });
+  try {
+    await Report.findByIdAndDelete(reportId);
+    console.log("Report deleted");
+  } catch (error) {
+    console.error(`Error deleting report: ${error}`);
+  }
 }
 
 export async function generateReport(req, res) {
