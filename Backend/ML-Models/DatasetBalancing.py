@@ -43,7 +43,7 @@ for i, (gender, diabetes_class) in enumerate(
 def generate_synthetic_data_for_class(df, gender, diabetes_class, num_records):
     synthetic_df = pd.DataFrame()
     for column in df.columns:
-        if column in ["Gender", "class"]:  # These will be set explicitly later
+        if column in ["Gender", "class"]:
             continue
         if df[column].dtype == np.number:
             mean, std = (
@@ -86,3 +86,19 @@ balanced_df.to_csv(
 )
 
 print("Dataset balancing complete. The balanced dataset has been saved.")
+
+# Evaluate new dataset and its class distribution
+
+df = pd.read_csv("../../Dataset/balanced_diabetes_data.csv")
+
+# Basic statistics for each feature
+print(df.describe(include="all"))
+
+# Class distribution
+print(df["class"].value_counts())
+
+# Gender distribution
+print(df["Gender"].value_counts())
+
+# Class distribution with respect to gender
+print(df.groupby("Gender")["class"].value_counts())

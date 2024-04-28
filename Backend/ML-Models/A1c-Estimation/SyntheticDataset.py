@@ -36,18 +36,18 @@ def simulate_glucose_readings(num_days, readings_per_day, category, bmi, age, ge
     glucose_readings = []
 
     # Define max thresholds for each category
-    max_thresholds = {"non_diabetic": 140, "pre_diabetic": 170, "diabetic": 200}
+    max_thresholds = {"non_diabetic": 140, "pre_diabetic": 200, "diabetic": 260}
 
     # Loop over each day and reading
     for day in range(num_days):
         for reading in range(readings_per_day):
             # Set base glucose levels for different categories
             if category == "non_diabetic":
-                base = np.random.normal(70, 8)
+                base = np.random.normal(70, 10)
             elif category == "pre_diabetic":
                 base = np.random.normal(110, 18)
             else:  # diabetic
-                base = np.random.normal(135, 22)
+                base = np.random.normal(135, 24)
 
             # Simulate glucose reading variation due to BMI only for the first reading of the day
             if reading == 0:
@@ -91,7 +91,7 @@ def simulate_hba1c_from_glucose(glucose_readings):
     # Add some random biological variability
     hba1c += np.random.normal(0, 0.2)
 
-    return np.round(hba1c, 1)  # Round to one decimal place for HbA1c
+    return np.round(hba1c, 1)
 
 
 # Generate synthetic dataset
