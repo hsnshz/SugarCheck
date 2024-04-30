@@ -163,7 +163,7 @@ const LoggedMealsScreen = ({ navigation }) => {
             fetchMeals(newViewMode);
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
           }}
-          buttonText={viewMode === "date" ? "Week" : "Date"}
+          buttonText={viewMode === "date" ? "Date" : "Week"}
           buttonTextStyle={{ color: colors.white }}
           containerStyle={{
             marginLeft: 20,
