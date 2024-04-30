@@ -431,11 +431,25 @@ const SignUpScreen = ({ navigation }) => {
                 onSubmitEditing={handleSubmit}
               />
 
+              <TouchableOpacity
+                style={styles.btnTerms}
+                onPress={() => navigation.navigate("TermsandConditions")}
+                activeOpacity={0.6}
+              >
+                <Text style={styles.btnTermsText}>
+                  By signing up, you agree to our Terms and Conditions
+                </Text>
+              </TouchableOpacity>
+
               {errorMessage && (
                 <Text style={styles.errorText}>{errorMessage}</Text>
               )}
 
-              <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={handleSubmit}
+                activeOpacity={0.7}
+              >
                 <ButtonSecondary>Sign Up</ButtonSecondary>
               </TouchableOpacity>
             </>
@@ -445,7 +459,7 @@ const SignUpScreen = ({ navigation }) => {
 
           <TouchableOpacity
             onPress={() => navigation.navigate("SignIn")}
-            activeOpacity={0.8}
+            activeOpacity={0.6}
             style={styles.signInBtn}
           >
             <Text style={styles.signInText}>Sign In</Text>
@@ -501,6 +515,7 @@ const styles = StyleSheet.create({
     width: "40%",
     alignItems: "center",
     margin: Platform.OS === "android" ? 20 : 15,
+    marginTop: 30,
   },
   heading: {
     marginBottom: 50,
@@ -592,6 +607,18 @@ const styles = StyleSheet.create({
     fontFamily: "MontserratRegular",
     fontSize: 16,
     color: colors.complementary,
+  },
+  btnTerms: {
+    justifyContent: "center",
+    alignItems: "center",
+    width: "80%",
+    marginTop: 20,
+  },
+  btnTermsText: {
+    fontFamily: "MontserratRegular",
+    fontSize: 16,
+    color: colors.complementary,
+    textAlign: "center",
   },
 });
 

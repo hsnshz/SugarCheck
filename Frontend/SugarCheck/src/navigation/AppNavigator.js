@@ -73,6 +73,13 @@ export function RootStackNavigator() {
         }}
       />
       <Stack.Screen
+        name="TermsandConditions"
+        component={TermsConditions}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
         name="EmailVerificationScreen"
         component={EmailVerificationScreen}
         options={{ headerShown: false }}
