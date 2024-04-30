@@ -33,7 +33,7 @@ const NutritionalAnalysisScreen = () => {
     }
 
     // Check if query contains only letters, numbers, spaces, and common ingredient separators
-    const isValid = /^[a-zA-Z0-9 ,.-]*$/.test(query);
+    const isValid = /^[a-zA-Z0-9 ,.\n-]*$/.test(query);
 
     // Check if query is a valid number
     const isNumber = !isNaN(query);
@@ -53,6 +53,7 @@ const NutritionalAnalysisScreen = () => {
   };
 
   const fetchNutritionInfo = async () => {
+    setErrorMessage(null);
     setIsLoading(true);
 
     if (!validateInput()) {
