@@ -114,7 +114,11 @@ const NotificationsSettings = ({ navigation }) => {
           })
         );
 
-        handleNotification();
+        handleNotification(
+          updatedGlucoseReminders,
+          updatedMealReminders,
+          updatedExerciseNotificationTime
+        );
 
         toastRef.current.show("Settings saved successfully", {
           type: "success",
