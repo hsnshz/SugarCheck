@@ -4,7 +4,14 @@ import { Card, Button } from "react-native-elements";
 import { useNavigation } from "@react-navigation/native";
 import colors from "../../config/colors";
 
-const CardComponent = ({ title, text, image, btnText, navigateTo }) => {
+const CardComponent = ({
+  title,
+  text,
+  image,
+  btnText,
+  navigateTo,
+  navigationTo,
+}) => {
   const navigation = useNavigation();
 
   return (
@@ -15,7 +22,9 @@ const CardComponent = ({ title, text, image, btnText, navigateTo }) => {
       <Text style={styles.textContainer}>{text}</Text>
       <TouchableOpacity
         style={styles.btn}
-        onPress={() => navigation.navigate(navigateTo)}
+        onPress={() => {
+          navigateTo ? navigateTo() : navigation.navigate(navigationTo);
+        }}
       >
         <Text style={styles.btnText}>{btnText}</Text>
       </TouchableOpacity>

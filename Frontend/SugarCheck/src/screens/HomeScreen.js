@@ -265,14 +265,18 @@ const Home = ({ navigation }) => {
               title="Log your glucose!"
               text="You have not logged at least 3 glucose readings today. Tap here to log now."
               btnText="Log Glucose"
-              navigateTo="Glucose Monitor"
+              navigateTo={() => navigation.navigate("Glucose Monitor")}
             />
           ) : !hasLoggedMealToday(mealLogs) ? (
             <CardComponent
               title="Log your meals!"
               text="Tap here to log a meal for today to keep track of your nutrition."
               btnText="Log Meals"
-              navigateTo={"Log Meals"}
+              navigationTo={{
+                name: "Diet",
+                screen: "DietTabNavigator",
+                params: { screen: "Log Meals" },
+              }}
             />
           ) : null}
 
