@@ -125,6 +125,7 @@ export async function fetchMealLog(req, res) {
 
       startOfDay = new Date(date.setUTCDate(firstDayOfWeek));
       endOfDay = new Date(date.setUTCDate(lastDayOfWeek));
+      endOfDay.setUTCHours(23, 59, 59, 999);
     }
 
     // Find the meal logs for the current day or week
