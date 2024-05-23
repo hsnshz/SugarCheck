@@ -3,4 +3,4 @@ such as diabetes prediction, meal logging, recipe search, glucose monitoring, AI
 
 The app is built using a variety of tools such as React Native for the front-end, Express.js (Node.js) for the backend, MongoDB for the database and Python for the machine learning algorithms.
 
-This app is for my final year project at the University of Westminster.
+This app is for my final year project.
